@@ -1,1 +1,50 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  color: #222;
+  margin: 0;
+  padding: 0;
+}
 
+header {
+  background: #ddd;
+  padding: 1em;
+}
+
+h1 {
+  margin: 0;
+}
+
+main {
+  padding: 1em;
+}
+
+#dot {
+  cursor: pointer;
+  color: #222;
+}
+
+.hover-secret {
+  border-bottom: 1px dotted #555;
+  cursor: pointer;
+}
+
+#secretArea {
+  margin-top: 2em;
+  padding: 1em;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
+.glitch {
+  animation: glitchAnim 0.2s infinite;
+}
+
+@keyframes glitchAnim {
+  0% { transform: translate(0,0); }
+  20% { transform: translate(-2px,1px); }
+  40% { transform: translate(2px,-1px); }
+  60% { transform: translate(-1px,2px); }
+  80% { transform: translate(1px,-2px); }
+  100% { transform: translate(0,0); }
+}
