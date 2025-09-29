@@ -2,30 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Department of Records</title>
+  <title>United States Department of Records</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
   <header>
-    <h1>Department of Records</h1>
-    <p>Official Government Information Portal<span id="dot">.</span></p>
+    <div class="seal">
+      <svg viewBox="0 0 100 100" class="seal-svg">
+        <circle cx="50" cy="50" r="48" stroke="navy" stroke-width="4" fill="white"/>
+        <text x="50" y="55" text-anchor="middle" font-size="18" fill="navy">★</text>
+      </svg>
+      <h1>United States Department of Records</h1>
+    </div>
+    <p class="subtitle">Official Information Portal<span id="dot">.</span></p>
   </header>
 
   <main>
     <section>
-      <h2>Notice</h2>
-      <p>Welcome to the Department of Records. This site contains general public information. 
-      Please consult official documents for authoritative records. 
-      <span class="hover-secret">NOTICE</span></p>
+      <h2>Public Notice</h2>
+      <p>
+        Welcome to the United States Department of Records. This site contains general public
+        information and resources. For authoritative documentation, please consult official
+        publications and forms. <span class="hover-secret">NOTICE</span>
+      </p>
     </section>
 
     <section>
       <h2>Employee Access</h2>
-      <button id="loginBtn">Employee Login</button>
+      <p>
+        Restricted to authorized personnel only. Unauthorized use may result in disciplinary
+        action.
+      </p>
+      <button id="loginBtn" class="btn">Employee Login</button>
     </section>
 
     <section id="secretArea"></section>
   </main>
+
+  <footer>
+    <p>U.S. Government System · For Official Use Only</p>
+    <p>Misuse of this system is subject to civil and criminal penalties.</p>
+  </footer>
 
   <!-- hidden SVG glitch canvas -->
   <svg id="glitchSVG" width="0" height="0"></svg>
