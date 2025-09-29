@@ -1,21 +1,28 @@
+# .github/workflows/useless.yml
 name: Useless Commit Bot
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
   useless-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: echo "Last useless update: $(date)" > useless.txt
+      - name: Write useless file
+        run: |
+          echo "Last useless update: $(date -u)" > useless.txt
 
-      - run: |
+      - name: Commit & push
+        run: |
           git config --global user.name "useless-bot"
           git config --global user.email "bot@example.com"
           git add useless.txt
-          git commit -m "useless update at $(date)" || echo "No changes to commit"
+          git commit -m "useless update at $(date -u)" || echo "No changes to commit"
           git push
