@@ -1,40 +1,36 @@
-.clearance-panel {
-  border: 3px solid #333;
-  padding: 1.5em;
-  font-family: "Courier New", monospace;
-  margin-top: 1em;
-  text-align: center;
+/* Inset frame */
+.frame {
+  border: 8px solid #0047ab; /* official navy blue */
+  margin: 25px;
+  padding: 20px;
+  min-height: calc(100vh - 50px);
+  box-sizing: border-box;
+  background: #fff;
 }
 
-/* Success (green) */
-.clearance-panel.success {
-  border-color: #060;
-  background: #f9fff9;
+/* Header styling */
+.gov-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
 }
 
-.clearance-panel.success h2 {
-  color: #060;
+.logo {
+  display: flex;
+  align-items: center;
+  cursor: pointer; /* clickable for secret */
 }
 
-/* Denied (red) */
-.clearance-panel.denied {
-  border-color: #900;
-  background: #fff5f5;
+.logo img {
+  height: 50px;
+  margin-right: 10px;
 }
 
-.clearance-panel.denied h2 {
-  color: #900;
-}
-
-/* Stamps */
-.stamp.clearance {
-  margin-top: 1em;
-  color: #060;
-  border-color: #060;
-}
-
-.stamp.denied {
-  margin-top: 1em;
-  color: #900;
-  border-color: #900;
+.logo span {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #222;
+  font-family: "Georgia", serif;
 }
