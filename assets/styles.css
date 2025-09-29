@@ -1,20 +1,40 @@
 .clearance-panel {
-  border: 3px solid #060;
-  background: #f9fff9;
+  border: 3px solid #333;
   padding: 1.5em;
   font-family: "Courier New", monospace;
   margin-top: 1em;
   text-align: center;
 }
 
-.clearance-panel h2 {
-  color: #060;
-  margin-bottom: 0.5em;
-  text-transform: uppercase;
+/* Success (green) */
+.clearance-panel.success {
+  border-color: #060;
+  background: #f9fff9;
 }
 
+.clearance-panel.success h2 {
+  color: #060;
+}
+
+/* Denied (red) */
+.clearance-panel.denied {
+  border-color: #900;
+  background: #fff5f5;
+}
+
+.clearance-panel.denied h2 {
+  color: #900;
+}
+
+/* Stamps */
 .stamp.clearance {
   margin-top: 1em;
   color: #060;
   border-color: #060;
+}
+
+.stamp.denied {
+  margin-top: 1em;
+  color: #900;
+  border-color: #900;
 }
