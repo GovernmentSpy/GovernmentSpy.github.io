@@ -1,31 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Department of Records — Official Portal</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
 <body>
   <div class="frame">
     <header class="gov-header">
-      <div class="logo" id="logoSecret">
-        <img src="assets/logo.png" alt="Agency Logo" />
-        <span>Department of Administrative Affairs</span>
+      <div class="logo" id="logoSecret" title="Department Logo (click for updates)">
+        <!-- small SVG logo file -->
+        <img src="assets/logo.svg" alt="Agency Logo" />
+        <span class="logo-text">Department of Records</span>
+      </div>
+      <div class="header-right">
+        <button id="loginBtn" class="btn">Employee Login</button>
       </div>
     </header>
 
     <main>
-      <h1>Government Information Portal</h1>
-      <p>
-        Welcome to the official portal. For authorized personnel only. Please
-        review the daily bulletin and compliance updates below.
+      <h1 class="page-title">Government Information Portal</h1>
+      <p class="lead">
+        Welcome to the official public portal of the Department of Records. This site
+        contains general information, notices, and administrative resources. For
+        authoritative documentation consult the forms and publications section.
       </p>
 
-      <section class="notice">
-        <strong><span class="hoverNotice">NOTICE</span></strong>: All users must comply
-        with regulations.
+      <section class="notice-panel">
+        <strong><span class="hover-secret" id="hoverNotice">NOTICE</span></strong>
+        <p class="notice-text">All citizens should maintain up-to-date records with their local office.</p>
       </section>
 
-      <section class="employee">
-        <button id="loginBtn">Employee Login</button>
-      </section>
-
-      <section id="secretArea"></section>
+      <section id="secretArea" aria-live="polite"></section>
     </main>
+
+    <footer>
+      <p>U.S. Department of Records · For Official Use Only</p>
+      <p>Unauthorized use may lead to civil or criminal penalties.</p>
+    </footer>
   </div>
 
-  <script src="assets/main.js"></script>
+  <script src="assets/main.js" defer></script>
 </body>
+</html>
