@@ -1,36 +1,90 @@
+/* Dark Mode Base */
+body {
+  background: #0a0a0f;
+  color: #e0e0e0;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+}
+
 /* Inset frame */
 .frame {
-  border: 8px solid #0047ab; /* official navy blue */
+  border: 6px solid #1e4f9f; /* deep blue */
   margin: 25px;
   padding: 20px;
   min-height: calc(100vh - 50px);
   box-sizing: border-box;
-  background: #fff;
+  background: #141418;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Header styling */
+/* Watermark background */
+.frame::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  height: 400px;
+  background: url("assets/seal.png") no-repeat center;
+  background-size: contain;
+  opacity: 0.05;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Header */
 .gov-header {
   display: flex;
   align-items: center;
-  border-bottom: 2px solid #ccc;
-  padding-bottom: 10px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 8px;
   margin-bottom: 20px;
+  z-index: 1;
+  position: relative;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  cursor: pointer; /* clickable for secret */
+  cursor: pointer;
 }
 
 .logo img {
-  height: 50px;
-  margin-right: 10px;
+  height: 32px; /* smaller logo */
+  margin-right: 8px;
 }
 
 .logo span {
-  font-size: 1.2em;
+  font-size: 1em;
   font-weight: bold;
-  color: #222;
+  color: #e0e0e0;
   font-family: "Georgia", serif;
+}
+
+/* Content */
+h1 {
+  font-size: 1.5em;
+  margin-top: 0;
+  color: #e8e8f0;
+}
+
+p, section {
+  color: #c8c8c8;
+  z-index: 1;
+  position: relative;
+}
+
+/* Secret area styling */
+#secretArea {
+  margin-top: 20px;
+  background: rgba(20, 20, 30, 0.85);
+  border: 1px solid #333;
+  padding: 15px;
+  white-space: pre-wrap;
+  font-family: "Courier New", monospace;
+  font-size: 0.9em;
+  z-index: 1;
+  position: relative;
 }
