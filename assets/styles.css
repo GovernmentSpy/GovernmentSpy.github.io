@@ -1,36 +1,3 @@
-/* Dark official theme + inset blue frame + watermark */
-:root{
-  --frame-blue:#1e4f9f;
-  --muted:#c8c8c8;
-  --panel-bg: rgba(20,20,30,0.85);
-  --accent:#9cc1ff;
-}
-
-/* Page reset */
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{
-  background:#07070a;
-  color:var(--muted);
-  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  padding:18px;
-}
-
-/* Frame (inset border, not flush to edge) */
-.frame{
-  border:6px solid var(--frame-blue);
-  margin:20px;
-  padding:18px;
-  min-height:calc(100vh - 80px);
-  background:#0f1115;
-  position:relative;
-  overflow:hidden;
-  border-radius:6px;
-}
-
-/* Watermark (faint seal) */
 .frame::before{
   content:"";
   position:absolute;
@@ -40,109 +7,10 @@ body{
   width:420px;
   height:420px;
   transform:translate(-50%,-50%);
-  background-image:url("../assets/seal.svg");
+  background-image:url("seal.svg"); /* fixed path */
   background-repeat:no-repeat;
   background-position:center;
   background-size:contain;
   opacity:0.04;
   pointer-events:none;
-}
-
-/* Header */
-.gov-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding-bottom:10px;
-  border-bottom:1px solid #232427;
-  z-index:1;
-  position:relative;
-}
-.logo{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  cursor:pointer;
-}
-.logo img{
-  height:32px; /* smaller logo */
-  width:auto;
-  display:block;
-  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.6));
-}
-.logo-text{
-  font-family: "Georgia", serif;
-  color:#e6eaf3;
-  font-weight:600;
-  font-size:1rem;
-}
-
-/* Login button on header right */
-.header-right .btn{background:transparent;border:1px solid #2b475f;color:#cfe6ff;padding:8px 12px;border-radius:4px;cursor:pointer}
-.header-right .btn:hover{background:rgba(46,90,150,0.12)}
-
-/* Main */
-main{max-width:920px;margin:26px auto;position:relative;z-index:1}
-.page-title{color:#e8eefc;font-size:1.4rem;margin-bottom:10px}
-.lead{color:#bfc8d6;margin-bottom:18px;line-height:1.6}
-
-/* Notice panel */
-.notice-panel{background:var(--panel-bg);padding:12px;border:1px solid #202126;border-radius:6px;color:#cdd6e3;margin-bottom:16px}
-.hover-secret{border-bottom:1px dotted var(--accent); cursor:help;color:var(--accent)}
-
-/* Secret area */
-#secretArea{
-  margin-top:18px;
-  background:rgba(6,8,10,0.6);
-  border:1px solid #23242a;
-  padding:14px;
-  border-radius:6px;
-  white-space:pre-wrap;
-  font-family:"Courier New", monospace;
-  color:#e6eef8;
-  min-height:90px;
-}
-
-/* Redaction style (used in classified file) */
-.redacted{
-  background:#08080b;
-  color:transparent;
-  text-shadow:0 0 0 #000;
-  padding:12px;
-  border-radius:4px;
-  border:1px solid #111;
-  line-height:1.6;
-}
-
-/* Classified / confidential styling for secret pages */
-.classified-doc{font-family:"Courier New", monospace;color:#e6eef8;background:transparent}
-
-/* Conspiracy list */
-.consp{background:transparent;color:#dbeafe;padding:12px;border-radius:6px;border:1px solid #1b2430}
-
-/* Clearance panel (success / denied) */
-.clearance-panel{
-  padding:14px;border-radius:6px;border:2px solid #333;font-family:"Courier New",monospace;text-align:center;
-}
-.clearance-panel.success{border-color:#0b6b31;background:rgba(10,45,20,0.2);color:#dff7e6}
-.clearance-panel.denied{border-color:#7a1414;background:rgba(80,10,10,0.06);color:#ffdfe1}
-.clearance-panel h2{margin-bottom:8px}
-.stamp{display:inline-block;margin-top:10px;padding:6px 10px;border:2px solid;color:inherit;font-weight:700;transform:rotate(-3deg)}
-.stamp.clearance{border-color:#0b6b31;color:#bff1c9}
-.stamp.denied{border-color:#7a1414;color:#ffd2d2}
-
-/* Glitch animation */
-.glitch{animation:glitch-anim 700ms steps(2) 1}
-@keyframes glitch-anim{
-  0%{transform:translateX(0) skewX(0)}
-  33%{transform:translateX(-6px) skewX(-2deg)}
-  66%{transform:translateX(6px) skewX(2deg)}
-  100%{transform:translateX(0) skewX(0)}
-}
-
-/* Responsive */
-@media (max-width:720px){
-  .frame{margin:12px;padding:12px}
-  main{margin:14px}
-  .logo-text{display:none}
 }
