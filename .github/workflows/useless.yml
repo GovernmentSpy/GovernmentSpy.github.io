@@ -1,0 +1,21 @@
+name: Useless Commit Bot
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  useless-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: echo "Last useless update: $(date)" > useless.txt
+
+      - run: |
+          git config --global user.name "useless-bot"
+          git config --global user.email "bot@example.com"
+          git add useless.txt
+          git commit -m "useless update at $(date)" || echo "No changes to commit"
+          git push
