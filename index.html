@@ -1,46 +1,73 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Department of Records — Official Portal</title>
+  <meta charset="UTF-8">
+  <title>United States Department of Records</title>
   <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
+  <header>
+    <div class="seal">
+      <svg viewBox="0 0 100 100" class="seal-svg">
+        <circle cx="50" cy="50" r="48" stroke="navy" stroke-width="4" fill="white"/>
+        <text x="50" y="55" text-anchor="middle" font-size="18" fill="navy">★</text>
+      </svg>
+      <h1>United States Department of Records</h1>
+    </div>
+    <p class="subtitle">Official Information Portal<span id="dot">.</span></p>
+  </header>
   <div class="frame">
     <header class="gov-header">
-      <div class="logo" id="logoSecret" title="Department Logo (click for updates)">
-        <!-- small SVG logo file -->
-        <img src="assets/logo.svg" alt="Agency Logo" />
-        <span class="logo-text">Department of Records</span>
-      </div>
-      <div class="header-right">
-        <button id="loginBtn" class="btn">Employee Login</button>
+      <div class="logo" id="logoSecret">
+        <img src="assets/logo.png" alt="Agency Logo" />
+        <span>Department of Administrative Affairs</span>
       </div>
     </header>
 
+  <main>
+    <section>
+      <h2>Public Notice</h2>
     <main>
-      <h1 class="page-title">Government Information Portal</h1>
-      <p class="lead">
-        Welcome to the official public portal of the Department of Records. This site
-        contains general information, notices, and administrative resources. For
-        authoritative documentation consult the forms and publications section.
+      <h1>Government Information Portal</h1>
+      <p>
+        Welcome to the United States Department of Records. This site contains general public
+        information and resources. For authoritative documentation, please consult official
+        publications and forms. <span class="hover-secret">NOTICE</span>
+        Welcome to the official portal. For authorized personnel only. Please
+        review the daily bulletin and compliance updates below.
       </p>
+    </section>
 
-      <section class="notice-panel">
-        <strong><span class="hover-secret" id="hoverNotice">NOTICE</span></strong>
-        <p class="notice-text">All citizens should maintain up-to-date records with their local office.</p>
+    <section>
+      <h2>Employee Access</h2>
+      <p>
+        Restricted to authorized personnel only. Unauthorized use may result in disciplinary
+        action.
+      </p>
+      <button id="loginBtn" class="btn">Employee Login</button>
+    </section>
+
+    <section id="secretArea"></section>
+  </main>
+      <section class="notice">
+        <strong><span class="hoverNotice">NOTICE</span></strong>: All users must comply
+        with regulations.
       </section>
 
-      <section id="secretArea" aria-live="polite"></section>
-    </main>
+  <footer>
+    <p>U.S. Government System · For Official Use Only</p>
+    <p>Misuse of this system is subject to civil and criminal penalties.</p>
+  </footer>
+      <section class="employee">
+        <button id="loginBtn">Employee Login</button>
+      </section>
 
-    <footer>
-      <p>U.S. Department of Records · For Official Use Only</p>
-      <p>Unauthorized use may lead to civil or criminal penalties.</p>
-    </footer>
+  <!-- hidden SVG glitch canvas -->
+  <svg id="glitchSVG" width="0" height="0"></svg>
+      <section id="secretArea"></section>
+    </main>
   </div>
 
-  <script src="assets/main.js" defer></script>
+  <script src="assets/main.js"></script>
 </body>
 </html>
