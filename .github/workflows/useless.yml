@@ -2,8 +2,8 @@ name: Useless Commit Bot
 
 on:
   schedule:
-    - cron: '*/5 * * * *'   # runs every 5 minutes automatically
-  workflow_dispatch:         # still lets you run manually if you want
+    - cron: '*/5 * * * *'   
+  workflow_dispatch:         
 
 permissions:
   contents: write
