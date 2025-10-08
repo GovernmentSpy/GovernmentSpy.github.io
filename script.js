@@ -2,8 +2,11 @@ const chatForm = document.getElementById('chat-form');
 const userInput = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
 
+// Set your netlify API URL here
+const API_URL = "catacombe.netlify.app";
+
 // Handle form submit
-chatForm.addEventListener('submit', (e) => {
+chatForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const question = userInput.value.trim();
   if (!question) return;
@@ -11,12 +14,26 @@ chatForm.addEventListener('submit', (e) => {
   addMessage(question, 'user');
   userInput.value = '';
 
-  // Solve math question
   try {
-    const answer = solveMath(question);
-    addMessage(answer, 'bot');
+    // Try backend first
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question })
+    });
+
+    if (!response.ok) throw new Error("API error");
+    const data = await response.json();
+    addMessage(data.answer || "🤔 No answer from AI.", 'bot');
+
   } catch (err) {
-    addMessage("❌ I can't solve that!", 'bot');
+    // If backend fails, fallback to client-side math
+    try {
+      const answer = solveMath(question);
+      addMessage(answer, 'bot');
+    } catch {
+      addMessage("❌ I can't solve that!", 'bot');
+    }
   }
 });
 
@@ -42,7 +59,7 @@ async function addMessage(message, type) {
   }
 }
 
-// Simple math solver
+// Client-side fallback math solver
 function solveMath(input) {
   // Only allow digits, operators, parentheses, decimal
   if(!/^[0-9+\-*/().\s]+$/.test(input)) throw "Invalid input";
