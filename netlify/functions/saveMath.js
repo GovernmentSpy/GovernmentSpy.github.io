@@ -1,6 +1,6 @@
 import { Client } from "@neondatabase/serverless";
 
-const client = new Client({ connectionString: process.env.DATABASE_URL });
+const client = new Client({ connectionString: process.env.NETLIFY_DATABASE_URL });
 
 export async function handler(event) {
   try {
@@ -8,7 +8,6 @@ export async function handler(event) {
 
     await client.connect();
 
-    // Ensure table exists
     await client.query(`
       CREATE TABLE IF NOT EXISTS math_logs(
         id SERIAL PRIMARY KEY,
@@ -18,7 +17,6 @@ export async function handler(event) {
       )
     `);
 
-    // Insert new log
     await client.query(
       'INSERT INTO math_logs(question, answer, notes) VALUES($1,$2,$3)',
       [question, answer, notes]
