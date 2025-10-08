@@ -1,28 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Math Chatbot</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Notes AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- SymPy.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sympy-js@0.3.0/dist/sympy.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="chat-app">
-      <header>
-        <h1>AI Math Chatbot</h1>
-        <p>Step-by-step math tutor</p>
-      </header>
-      <main id="chat-box"></main>
-      <form id="chat-form">
-        <input type="text" id="user-input" placeholder="e.g., Derivative of x^2 + 3x" autocomplete="off">
-        <button type="submit">Send</button>
-      </form>
-    </div>
+  <div class="app-container">
+    <header>
+      <h1>📘 Math Notes AI</h1>
+      <p class="subtitle">Solve. Learn. Understand.</p>
+    </header>
+
+    <main id="chat-box" class="chat-box">
+      <div class="intro">
+        <p>Ask me a math problem — I’ll solve it and create step-by-step notes!</p>
+        <p class="hint">Try: <code>derivative of x^3 + 2x</code> or <code>integrate sin(x)</code></p>
+      </div>
+    </main>
+
+    <form id="chat-form" class="chat-form">
+      <input id="user-input" type="text" placeholder="Type a math equation or question..." autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
   </div>
 
-  <!-- SymPy.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@cowasm/py-sympy@1.0.0/dist/index.js"></script>
+  <footer>
+    <p>Powered by <strong>SymPy.js</strong> + <strong>Render</strong> + <strong>Netlify</strong></p>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
