@@ -68,6 +68,23 @@ header p { margin: 5px 0 0 0; font-size: 0.9em; color: #aaa; }
   border-bottom-left-radius: 0;
 }
 
+.notes {
+  background: #222;
+  color: #ccc;
+  padding: 8px;
+  border-radius: 10px;
+  margin-top: 5px;
+  cursor: pointer;
+  white-space: pre-wrap;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.notes.expanded {
+  max-height: 500px;
+}
+
 #chat-form {
   display: flex;
   border-top: 1px solid #333;
