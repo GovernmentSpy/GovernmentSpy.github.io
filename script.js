@@ -2,71 +2,46 @@ const chatForm = document.getElementById("chat-form");
 const userInput = document.getElementById("user-input");
 const chatBox = document.getElementById("chat-box");
 
-// Your Render backend URL
-const API_URL = "https://governmentspy-github-io.onrender.com/ask";
+// Use your Render backend URL
+const API_URL = "https://governmentspy-github-io-1.onrender.com/ask";
 
-// Load SymPy.js from CDN
+// Load SymPy.js
 let sympy;
-SymPy.load().then((module) => {
+SymPy.load().then(module => {
   sympy = module;
-  console.log("✅ SymPy.js loaded successfully");
+  console.log("SymPy loaded");
 });
 
 // Parse natural language
 function parseMathInput(input) {
   input = input.toLowerCase();
-  if (input.startsWith("derivative of"))
+  if (input.startsWith("derivative of")) {
     return { expr: input.replace("derivative of", "").trim(), type: "diff" };
-  if (input.startsWith("integrate"))
+  }
+  if (input.startsWith("integrate")) {
     return { expr: input.replace("integrate", "").trim(), type: "int" };
+  }
   return { expr: input, type: "eval" };
 }
 
-// Generate AI-style steps
+// Generate steps
 function generateSteps(parsed, type, result) {
   const steps = [];
   if (type === "diff") {
-    steps.push({
-      icon: "🟢",
-      text: `Identifying function to differentiate: ${parsed}`,
-      class: "derivative",
-    });
-    steps.push({
-      icon: "🟢",
-      text: "Applying derivative rules (power, sum, constants)...",
-      class: "derivative",
-    });
-    steps.push({ icon: "🟢", text: `Result: ${result}`, class: "derivative" });
+    steps.push({ icon: "🟢", text: `Differentiate: ${parsed}`, cls: "derivative" });
+    steps.push({ icon: "🟢", text: `Result: ${result}`, cls: "derivative" });
   } else if (type === "int") {
-    steps.push({
-      icon: "🔵",
-      text: `Identifying function to integrate: ${parsed}`,
-      class: "integral",
-    });
-    steps.push({
-      icon: "🔵",
-      text: "Applying integration rules (power, trig, constants)...",
-      class: "integral",
-    });
-    steps.push({
-      icon: "🔵",
-      text: "Add constant of integration (C).",
-      class: "integral",
-    });
-    steps.push({ icon: "🔵", text: `Result: ${result}`, class: "integral" });
+    steps.push({ icon: "🔵", text: `Integrate: ${parsed}`, cls: "integral" });
+    steps.push({ icon: "🔵", text: `Result: ${result}`, cls: "integral" });
   } else {
-    steps.push({
-      icon: "⚪",
-      text: `Simplified: ${result}`,
-      class: "simplify",
-    });
+    steps.push({ icon: "⚪", text: `Simplified: ${result}`, cls: "simplify" });
   }
   return steps;
 }
 
-// Solve using Render backend OR fallback to SymPy
+// Try backend, fallback to local SymPy
 async function solveMath(question) {
-  if (!question) return;
+  // Try backend
   try {
     const res = await fetch(API_URL, {
       method: "POST",
@@ -74,16 +49,26 @@ async function solveMath(question) {
       body: JSON.stringify({ question }),
     });
     if (res.ok) {
-      const data = await res.json();
-      if (data.result)
-        return { answer: data.result, steps: data.notes || [] };
+      const obj = await res.json();
+      if (obj.answer !== undefined && obj.notes !== undefined) {
+        // If backend returns structured answer + notes
+        // We expect obj.answer (string) and obj.notes (something)
+        // Convert notes to the same steps format if needed
+        let steps = obj.notes;
+        if (!Array.isArray(steps)) {
+          // If notes is a text string, parse it
+          steps = generateSteps(obj.notes, "eval", obj.answer);
+        }
+        return { answer: obj.answer, steps: steps };
+      }
     }
   } catch (e) {
-    console.warn("⚠️ Backend unreachable, using local SymPy...");
+    console.warn("Backend API failed, falling back:", e);
   }
 
-  // Local SymPy fallback
+  // Fallback local SymPy
   if (!sympy) return { answer: "Loading SymPy...", steps: [] };
+
   try {
     const { expr, type } = parseMathInput(question);
     const parsed = sympy.parse(expr);
@@ -99,16 +84,16 @@ async function solveMath(question) {
         result = parsed.toString();
     }
     const steps = generateSteps(parsed, type, result);
-    return { answer: result, steps };
+    return { answer: result, steps: steps };
   } catch (err) {
     return {
-      answer: "❌ Cannot process expression.",
-      steps: [{ icon: "⚪", text: "Try simpler arithmetic.", class: "simplify" }],
+      answer: "❌ Error",
+      steps: [{ icon: "⚪", text: "Could not parse expression", cls: "simplify" }],
     };
   }
 }
 
-// Send message
+// Form submission
 chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const question = userInput.value.trim();
@@ -119,7 +104,7 @@ chatForm.addEventListener("submit", async (e) => {
   addMessage(answer, "bot", steps);
 });
 
-// Add messages to chat
+// Add message to UI
 async function addMessage(message, type, steps = []) {
   const div = document.createElement("div");
   div.classList.add("chat-message", type === "user" ? "user-message" : "bot-message");
@@ -128,20 +113,18 @@ async function addMessage(message, type, steps = []) {
     div.textContent = "";
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
-
     for (let i = 0; i < message.length; i++) {
       div.textContent += message[i];
       chatBox.scrollTop = chatBox.scrollHeight;
-      await new Promise((r) => setTimeout(r, 15));
+      await new Promise(r => setTimeout(r, 20));
     }
-
     if (steps.length > 0) {
       const notesDiv = document.createElement("div");
       notesDiv.classList.add("notes");
-      steps.forEach((step) => {
+      steps.forEach(step => {
         const stepDiv = document.createElement("div");
-        stepDiv.classList.add("note-step", step.class);
-        stepDiv.innerHTML = `<span class="icon">${step.icon}</span>${step.text}`;
+        stepDiv.classList.add("note-step", step.cls);
+        stepDiv.innerHTML = `<span class="icon">${step.icon}</span> ${step.text}`;
         notesDiv.appendChild(stepDiv);
       });
       notesDiv.addEventListener("click", () => notesDiv.classList.toggle("expanded"));
