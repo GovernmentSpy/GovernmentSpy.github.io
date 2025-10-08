@@ -1,4 +1,3 @@
-// Select elements
 const chatForm = document.getElementById('chat-form');
 const userInput = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
@@ -6,32 +5,50 @@ const chatBox = document.getElementById('chat-box');
 const SAVE_FUNCTION = "/.netlify/functions/saveMath";
 const FETCH_HISTORY = "/.netlify/functions/fetchMath";
 
-// Load SymPy.js
 let sympy;
 SymPy.load().then(module => {
   sympy = module;
   console.log("SymPy.js loaded!");
-  loadHistory(); // Load previous questions when ready
+  loadHistory();
 });
 
-// Solve math question
+// Parse natural language math (basic)
+function parseMathInput(input) {
+  input = input.toLowerCase();
+  if (input.startsWith("derivative of")) {
+    return { expr: input.replace("derivative of", "").trim(), type: "diff" };
+  }
+  if (input.startsWith("integrate")) {
+    return { expr: input.replace("integrate", "").trim(), type: "int" };
+  }
+  return { expr: input, type: "eval" };
+}
+
+// Solve math
 async function solveMath(question) {
   if (!sympy) return { answer: "Loading SymPy...", notes: "" };
 
-  let answer = "";
-  let notes = "";
+  let answer = "", notes = "";
 
   try {
-    const expr = sympy.parse(question);
+    const { expr, type } = parseMathInput(question);
+    const parsed = sympy.parse(expr);
 
-    let derivative, integral;
-    try { derivative = expr.diff('x'); } catch {}
-    try { integral = expr.integrate('x'); } catch {}
+    switch (type) {
+      case "diff":
+        answer = parsed.diff('x').toString();
+        notes = `Expression: ${parsed}\nDerivative w.r.t x: ${answer}`;
+        break;
+      case "int":
+        answer = parsed.integrate('x').toString();
+        notes = `Expression: ${parsed}\nIntegral w.r.t x: ${answer}`;
+        break;
+      default:
+        answer = parsed.toString();
+        notes = `Expression: ${parsed}`;
+        break;
+    }
 
-    answer = derivative ? derivative.toString() : expr.toString();
-    notes = `Expression: ${expr}\n` +
-            (derivative ? `Derivative w.r.t x: ${derivative}\n` : "") +
-            (integral ? `Integral w.r.t x: ${integral}` : "");
   } catch (err) {
     answer = "❌ Cannot process expression.";
     notes = "Try simpler algebra or arithmetic.";
@@ -40,7 +57,7 @@ async function solveMath(question) {
   return { answer, notes };
 }
 
-// Save to Netlify DB
+// Save to DB
 async function saveToDB(question, answer, notes) {
   try {
     await fetch(SAVE_FUNCTION, {
@@ -53,7 +70,7 @@ async function saveToDB(question, answer, notes) {
   }
 }
 
-// Fetch previous chat history
+// Load history
 async function loadHistory() {
   try {
     const res = await fetch(FETCH_HISTORY);
@@ -69,13 +86,11 @@ async function loadHistory() {
   }
 }
 
-// Handle chat submission
-chatForm.addEventListener('submit', async (e) => {
-  e.preventDefault(); // <-- Prevent page reload
-
+// Form submission
+chatForm.addEventListener('submit', async e => {
+  e.preventDefault();
   const question = userInput.value.trim();
   if (!question) return;
-
   userInput.value = '';
 
   addMessage(question, 'user');
@@ -87,7 +102,7 @@ chatForm.addEventListener('submit', async (e) => {
   saveToDB(question, answer, notes);
 });
 
-// Add chat messages with optional collapsible notes
+// Add chat messages
 async function addMessage(message, type, notesText) {
   const div = document.createElement('div');
   div.classList.add('chat-message', type === 'user' ? 'user-message' : 'bot-message');
@@ -97,14 +112,12 @@ async function addMessage(message, type, notesText) {
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Animate text typing
     for (let i = 0; i < message.length; i++) {
       div.textContent += message[i];
       chatBox.scrollTop = chatBox.scrollHeight;
-      await new Promise(r => setTimeout(r, 25));
+      await new Promise(r => setTimeout(r, 20));
     }
 
-    // Add collapsible notes
     if (notesText) {
       const notesDiv = document.createElement('div');
       notesDiv.classList.add('notes');
