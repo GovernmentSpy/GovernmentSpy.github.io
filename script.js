@@ -1,3 +1,4 @@
+// Select elements
 const chatForm = document.getElementById('chat-form');
 const userInput = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
@@ -10,7 +11,7 @@ let sympy;
 SymPy.load().then(module => {
   sympy = module;
   console.log("SymPy.js loaded!");
-  loadHistory(); // Load previous questions on startup
+  loadHistory(); // Load previous questions when ready
 });
 
 // Solve math question
@@ -68,22 +69,25 @@ async function loadHistory() {
   }
 }
 
-// Handle chat form
-chatForm.addEventListener('submit', async e => {
-  e.preventDefault();
+// Handle chat submission
+chatForm.addEventListener('submit', async (e) => {
+  e.preventDefault(); // <-- Prevent page reload
+
   const question = userInput.value.trim();
   if (!question) return;
 
-  addMessage(question, 'user');
   userInput.value = '';
 
+  addMessage(question, 'user');
+
   const { answer, notes } = await solveMath(question);
+
   addMessage(answer, 'bot', notes);
 
   saveToDB(question, answer, notes);
 });
 
-// Add message with optional collapsible notes
+// Add chat messages with optional collapsible notes
 async function addMessage(message, type, notesText) {
   const div = document.createElement('div');
   div.classList.add('chat-message', type === 'user' ? 'user-message' : 'bot-message');
@@ -93,12 +97,14 @@ async function addMessage(message, type, notesText) {
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
 
+    // Animate text typing
     for (let i = 0; i < message.length; i++) {
       div.textContent += message[i];
       chatBox.scrollTop = chatBox.scrollHeight;
       await new Promise(r => setTimeout(r, 25));
     }
 
+    // Add collapsible notes
     if (notesText) {
       const notesDiv = document.createElement('div');
       notesDiv.classList.add('notes');
