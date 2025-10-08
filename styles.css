@@ -1,66 +1,113 @@
+/* General Styles */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f9;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #000;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  margin: 0;
 }
 
-.chat-container {
-  background-color: white;
+/* App Container */
+.app {
+  display: flex;
+  flex-direction: column;
   width: 400px;
   max-width: 90%;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  height: 600px;
+  background-color: #121212;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  color: #fff;
 }
 
-h1 {
+/* Header */
+header {
   text-align: center;
+  padding: 15px;
+  border-bottom: 1px solid #333;
 }
 
+header h1 { margin: 0; font-size: 1.5em; }
+header p { margin: 5px 0 0 0; font-size: 0.9em; color: #aaa; }
+
+/* Chat Box */
 #chat-box {
-  height: 400px;
+  flex: 1;
+  padding: 15px;
   overflow-y: auto;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
 }
 
+/* Chat Bubbles */
 .chat-message {
-  margin: 5px 0;
+  max-width: 80%;
+  padding: 12px 18px;
+  border-radius: 20px;
+  word-wrap: break-word;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.3s forwards;
+}
+
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .user-message {
-  text-align: right;
-  color: blue;
+  align-self: flex-end;
+  background: #1e88e5;
+  color: #fff;
+  border-bottom-right-radius: 0;
 }
 
 .bot-message {
-  text-align: left;
-  color: green;
+  align-self: flex-start;
+  background: #43a047;
+  color: #fff;
+  border-bottom-left-radius: 0;
 }
 
+/* Form (fixed middle) */
 #chat-form {
   display: flex;
+  border-top: 1px solid #333;
+  padding: 10px;
+  background-color: #000;
 }
 
 #user-input {
   flex: 1;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: 1px solid #555;
+  background-color: #222;
+  color: #fff;
+  outline: none;
+  font-size: 1em;
+}
+
+#user-input::placeholder {
+  color: #aaa;
 }
 
 button {
-  padding: 10px;
-  margin-left: 5px;
-  border-radius: 6px;
+  padding: 12px 20px;
+  margin-left: 10px;
   border: none;
-  background-color: #007bff;
+  border-radius: 10px;
+  background: #1e88e5;
   color: white;
+  font-weight: bold;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: #1565c0;
 }
