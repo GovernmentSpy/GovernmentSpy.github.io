@@ -6,13 +6,15 @@ const SAVE_FUNCTION = "/.netlify/functions/saveMath";
 const FETCH_HISTORY = "/.netlify/functions/fetchMath";
 
 let sympy;
+
+// Load SymPy.js
 SymPy.load().then(module => {
   sympy = module;
   console.log("SymPy.js loaded!");
   loadHistory();
 });
 
-// Parse natural language math (basic)
+// Parse natural language
 function parseMathInput(input) {
   input = input.toLowerCase();
   if (input.startsWith("derivative of")) {
@@ -24,40 +26,52 @@ function parseMathInput(input) {
   return { expr: input, type: "eval" };
 }
 
-// Solve math
+// Automatically generate step-by-step notes
+function generateNotes(parsedExpr, type, result) {
+  let notes = `Expression: ${parsedExpr}\n`;
+  if (type === "diff") {
+    notes += `Step 1: Identify the function to differentiate\n`;
+    notes += `Step 2: Apply derivative rules (power, sum, constants)\n`;
+    notes += `Step 3: Derivative result: ${result}`;
+  } else if (type === "int") {
+    notes += `Step 1: Identify the function to integrate\n`;
+    notes += `Step 2: Apply integration rules (power, trig, constants)\n`;
+    notes += `Step 3: Add constant of integration\n`;
+    notes += `Step 4: Integral result: ${result}`;
+  } else {
+    notes += `Simplified result: ${result}`;
+  }
+  return notes;
+}
+
+// Solve math and generate notes
 async function solveMath(question) {
   if (!sympy) return { answer: "Loading SymPy...", notes: "" };
-
-  let answer = "", notes = "";
 
   try {
     const { expr, type } = parseMathInput(question);
     const parsed = sympy.parse(expr);
+    let result;
 
     switch (type) {
       case "diff":
-        answer = parsed.diff('x').toString();
-        notes = `Expression: ${parsed}\nDerivative w.r.t x: ${answer}`;
+        result = parsed.diff('x').toString();
         break;
       case "int":
-        answer = parsed.integrate('x').toString();
-        notes = `Expression: ${parsed}\nIntegral w.r.t x: ${answer}`;
+        result = parsed.integrate('x').toString();
         break;
       default:
-        answer = parsed.toString();
-        notes = `Expression: ${parsed}`;
-        break;
+        result = parsed.toString();
     }
 
+    const notes = generateNotes(parsed, type, result);
+    return { answer: result, notes };
   } catch (err) {
-    answer = "❌ Cannot process expression.";
-    notes = "Try simpler algebra or arithmetic.";
+    return { answer: "❌ Cannot process expression.", notes: "Try simpler algebra or arithmetic." };
   }
-
-  return { answer, notes };
 }
 
-// Save to DB
+// Save to Netlify DB
 async function saveToDB(question, answer, notes) {
   try {
     await fetch(SAVE_FUNCTION, {
@@ -70,7 +84,7 @@ async function saveToDB(question, answer, notes) {
   }
 }
 
-// Load history
+// Load chat history
 async function loadHistory() {
   try {
     const res = await fetch(FETCH_HISTORY);
@@ -86,7 +100,7 @@ async function loadHistory() {
   }
 }
 
-// Form submission
+// Form submit
 chatForm.addEventListener('submit', async e => {
   e.preventDefault();
   const question = userInput.value.trim();
@@ -102,7 +116,7 @@ chatForm.addEventListener('submit', async e => {
   saveToDB(question, answer, notes);
 });
 
-// Add chat messages
+// Add message to chat
 async function addMessage(message, type, notesText) {
   const div = document.createElement('div');
   div.classList.add('chat-message', type === 'user' ? 'user-message' : 'bot-message');
