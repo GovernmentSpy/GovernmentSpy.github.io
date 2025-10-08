@@ -1,6 +1,6 @@
 import { Client } from "@neondatabase/serverless";
 
-const client = new Client({ connectionString: process.env.DATABASE_URL });
+const client = new Client({ connectionString: process.env.NETLIFY_DATABASE_URL });
 
 export async function handler() {
   try {
