@@ -7,21 +7,21 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <header>
-      <h1>AI Math Chatbot</h1>
-      <p>Ask me any math question!</p>
-    </header>
-
-    <main id="chat-box"></main>
-
-    <form id="chat-form">
-      <input type="text" id="user-input" placeholder="Type your math question..." autocomplete="off">
-      <button type="submit">Send</button>
-    </form>
+  <div class="container">
+    <div class="chat-app">
+      <header>
+        <h1>🧠 AI Math Chatbot</h1>
+        <p>Ask me anything in natural math language!</p>
+      </header>
+      <main id="chat-box"></main>
+      <form id="chat-form">
+        <input type="text" id="user-input" placeholder="e.g., Derivative of x^2 + 3x" autocomplete="off">
+        <button type="submit">Send</button>
+      </form>
+    </div>
   </div>
 
-  <!-- SymPy.js CDN -->
+  <!-- SymPy.js -->
   <script src="https://cdn.jsdelivr.net/npm/@cowasm/py-sympy@1.0.0/dist/index.js"></script>
   <script src="script.js"></script>
 </body>
