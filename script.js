@@ -2,14 +2,15 @@ const chatForm = document.getElementById('chat-form');
 const userInput = document.getElementById('user-input');
 const chatBox = document.getElementById('chat-box');
 
-// Netlify function for storing math logs
 const SAVE_FUNCTION = "/.netlify/functions/saveMath";
+const FETCH_HISTORY = "/.netlify/functions/fetchMath";
 
 // Load SymPy.js
 let sympy;
-SymPy.load().then((module) => {
+SymPy.load().then(module => {
   sympy = module;
   console.log("SymPy.js loaded!");
+  loadHistory(); // Load previous questions on startup
 });
 
 // Solve math question
@@ -22,14 +23,10 @@ async function solveMath(question) {
   try {
     const expr = sympy.parse(question);
 
-    // Try derivative
-    let derivative;
+    let derivative, integral;
     try { derivative = expr.diff('x'); } catch {}
-    // Try integral
-    let integral;
     try { integral = expr.integrate('x'); } catch {}
 
-    // Build answer and notes
     answer = derivative ? derivative.toString() : expr.toString();
     notes = `Expression: ${expr}\n` +
             (derivative ? `Derivative w.r.t x: ${derivative}\n` : "") +
@@ -51,12 +48,28 @@ async function saveToDB(question, answer, notes) {
       body: JSON.stringify({ question, answer, notes }),
     });
   } catch (err) {
-    console.error("Failed to save to DB:", err);
+    console.error("Failed to save:", err);
+  }
+}
+
+// Fetch previous chat history
+async function loadHistory() {
+  try {
+    const res = await fetch(FETCH_HISTORY);
+    const data = await res.json();
+    if (data && data.logs) {
+      data.logs.forEach(log => {
+        addMessage(log.question, 'user');
+        addMessage(log.answer, 'bot', log.notes);
+      });
+    }
+  } catch (err) {
+    console.error("Failed to load history:", err);
   }
 }
 
 // Handle chat form
-chatForm.addEventListener('submit', async (e) => {
+chatForm.addEventListener('submit', async e => {
   e.preventDefault();
   const question = userInput.value.trim();
   if (!question) return;
@@ -65,14 +78,13 @@ chatForm.addEventListener('submit', async (e) => {
   userInput.value = '';
 
   const { answer, notes } = await solveMath(question);
-  addMessage(answer, 'bot');
-  addMessage("📝 Notes:\n" + notes, 'bot');
+  addMessage(answer, 'bot', notes);
 
   saveToDB(question, answer, notes);
 });
 
-// Animated chat messages
-async function addMessage(message, type) {
+// Add message with optional collapsible notes
+async function addMessage(message, type, notesText) {
   const div = document.createElement('div');
   div.classList.add('chat-message', type === 'user' ? 'user-message' : 'bot-message');
 
@@ -86,6 +98,16 @@ async function addMessage(message, type) {
       chatBox.scrollTop = chatBox.scrollHeight;
       await new Promise(r => setTimeout(r, 25));
     }
+
+    if (notesText) {
+      const notesDiv = document.createElement('div');
+      notesDiv.classList.add('notes');
+      notesDiv.textContent = notesText;
+      notesDiv.addEventListener('click', () => notesDiv.classList.toggle('expanded'));
+      chatBox.appendChild(notesDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
   } else {
     div.textContent = message;
     chatBox.appendChild(div);
