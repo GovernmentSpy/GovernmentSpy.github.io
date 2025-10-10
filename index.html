@@ -8,7 +8,6 @@
     :root{
       --bg:#0b0f13;
       --text:#dfe7eb;
-      --accent:#57c7ff;
     }
     html,body{height:100%;}
     body{
@@ -16,8 +15,6 @@
       background: radial-gradient(ellipse at 10% 10%, #071018 0%, var(--bg) 40%);
       color:var(--text);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -31,7 +28,6 @@
       padding:24px;
     }
 
-    /* The large ASCII art click target */
     .entry-button{
       display:inline-block;
       border:0;
@@ -39,14 +35,9 @@
       cursor:pointer;
       padding:12px 18px;
       line-height:1;
-      transition:transform .18s ease, box-shadow .18s ease;
       border-radius:8px;
       outline: none;
       box-shadow: 0 6px 24px rgba(2,6,10,0.6), inset 0 -1px 0 rgba(255,255,255,0.02);
-    }
-
-    .entry-button:focus{
-      box-shadow: 0 6px 30px rgba(5,120,200,0.18), 0 0 0 4px rgba(87,199,255,0.06);
     }
 
     .entry-button:hover{ transform: translateY(-4px) scale(1.01); }
@@ -64,6 +55,7 @@
       box-shadow: 0 8px 40px rgba(0,0,0,0.7);
       user-select:none;
       -webkit-user-select:none;
+      position: relative;
     }
 
     .hint{
@@ -72,15 +64,37 @@
       font-size:13px;
     }
 
-    /* Enter animation */
-    .fade-out{
-      animation:fadeOutAndScale .55s ease forwards;
+    /* Wild fire glitch animation */
+    @keyframes fireGlitch {
+      0% { transform: translate(0,0) skew(0deg,0deg); color: #ff4500; }
+      5% { transform: translate(-2px,2px) skew(-5deg,5deg); color: #ff6347; }
+      10% { transform: translate(2px,-2px) skew(5deg,-5deg); color: #ff8c00; }
+      15% { transform: translate(-3px,1px) skew(-3deg,3deg); color: #ffa500; }
+      20% { transform: translate(3px,-1px) skew(3deg,-3deg); color: #ff4500; }
+      25% { transform: translate(-4px,2px) skew(-6deg,6deg); color: #ff6347; }
+      30% { transform: translate(4px,-2px) skew(6deg,-6deg); color: #ff8c00; }
+      35% { transform: translate(-2px,3px) skew(-3deg,3deg); color: #ffa500; }
+      40% { transform: translate(2px,-3px) skew(3deg,-3deg); color: #ff4500; }
+      50% { transform: translate(0,0) skew(0deg,0deg); color: #ff6347; }
+      60% { transform: translate(-3px,1px) skew(-5deg,5deg); color: #ff8c00; }
+      70% { transform: translate(3px,-1px) skew(5deg,-5deg); color: #ffa500; }
+      80% { transform: translate(-2px,2px) skew(-4deg,4deg); color: #ff4500; }
+      90% { transform: translate(2px,-2px) skew(4deg,-4deg); color: #ff6347; }
+      100% { transform: translate(0,0) skew(0deg,0deg); color: #ff8c00; }
     }
+
+    .fire-glitch {
+      animation: fireGlitch 0.8s linear forwards;
+    }
+
+    .fade-out{
+      animation: fadeOutAndScale .55s ease forwards;
+    }
+
     @keyframes fadeOutAndScale{
       to{ opacity:0; transform:scale(0.98) translateY(-8px); }
     }
 
-    /* Main content (hidden until clicked) */
     .main-content{
       position:fixed;
       inset:0;
@@ -115,7 +129,6 @@
     .card h1{ margin:0 0 6px 0; font-size:22px; }
     .card p{ margin:8px 0 0 0; color:rgba(223,231,235,0.8); }
 
-    /* Small screen adjustments */
     @media (max-width:520px){
       pre.ascii{font-size:14px; padding:18px;}
       .card{padding:18px}
@@ -124,8 +137,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- The ascii art button. Keyboard accessible. -->
-    <button class="entry-button" id="entry" aria-label="">
+    <button class="entry-button" id="entry" aria-label="Enter site">
       <pre class="ascii" id="ascii"> ░▒▓██████▓▒░░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
@@ -140,7 +152,6 @@
     <div class="hint">Click</div>
   </div>
 
-  <!-- The "inside" content that appears after clicking. Could be replaced by a redirect to another page. -->
   <div class="main-content" id="main">
     <div class="card">
       <h1>Welcome inside</h1>
@@ -156,30 +167,23 @@
     const main = document.getElementById('main');
 
     function openSite(){
-      // Play a quick animation on the ascii art then show main content
-      entryBtn.classList.add('fade-out');
+      ascii.classList.add('fire-glitch');
       setTimeout(()=>{
-        // hide the ascii area visually and show the main content
-        main.classList.add('visible');
-        entryBtn.style.display = 'none';
-        document.querySelector('.hint').style.display = 'none';
-        // Focus the first focusable element inside main
-        const focusable = main.querySelector('button, [href], input, textarea, select, [tabindex]');
-        if(focusable) focusable.focus();
-      }, 380);
-
-      // If you prefer to redirect to another page instead of revealing content here,
-      // replace the above with: window.location.href = '/your-target-page.html';
+        ascii.classList.remove('fire-glitch');
+        entryBtn.classList.add('fade-out');
+        setTimeout(()=>{
+          main.classList.add('visible');
+          entryBtn.style.display = 'none';
+          document.querySelector('.hint').style.display = 'none';
+        }, 380);
+      }, 800);
     }
 
     entryBtn.addEventListener('click', openSite);
-
-    // keyboard accessibility
     entryBtn.addEventListener('keydown', (e)=>{
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openSite(); }
     });
 
-    // allow ESC to go back
     document.addEventListener('keydown', (e)=>{
       if(e.key === 'Escape'){
         main.classList.remove('visible');
@@ -190,7 +194,6 @@
       }
     });
 
-    // Optional: make the ascii non-selectable on mobile but still accessible
     ascii.addEventListener('selectstart', (e)=>e.preventDefault());
   </script>
 </body>
