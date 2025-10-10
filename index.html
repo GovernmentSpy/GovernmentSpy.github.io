@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title> </title>
+  <title>Math Note Taker</title>
   <style>
     :root{
       --bg:#0b0f13;
       --text:#dfe7eb;
+      --accent:#4eb1ff;
     }
     html,body{height:100%;}
     body{
@@ -39,7 +40,6 @@
       outline: none;
       box-shadow: 0 6px 24px rgba(2,6,10,0.6), inset 0 -1px 0 rgba(255,255,255,0.02);
     }
-
     .entry-button:hover{ transform: translateY(-4px) scale(1.01); }
 
     pre.ascii{
@@ -64,7 +64,6 @@
       font-size:13px;
     }
 
-    /* Wild fire glitch animation */
     @keyframes fireGlitch {
       0% { transform: translate(0,0) skew(0deg,0deg); color: #ff4500; }
       5% { transform: translate(-2px,2px) skew(-5deg,5deg); color: #ff6347; }
@@ -82,18 +81,9 @@
       90% { transform: translate(2px,-2px) skew(4deg,-4deg); color: #ff6347; }
       100% { transform: translate(0,0) skew(0deg,0deg); color: #ff8c00; }
     }
-
-    .fire-glitch {
-      animation: fireGlitch 0.8s linear forwards;
-    }
-
-    .fade-out{
-      animation: fadeOutAndScale .55s ease forwards;
-    }
-
-    @keyframes fadeOutAndScale{
-      to{ opacity:0; transform:scale(0.98) translateY(-8px); }
-    }
+    .fire-glitch { animation: fireGlitch 0.8s linear forwards; }
+    .fade-out{ animation: fadeOutAndScale .55s ease forwards; }
+    @keyframes fadeOutAndScale{ to{ opacity:0; transform:scale(0.98) translateY(-8px); } }
 
     .main-content{
       position:fixed;
@@ -109,11 +99,7 @@
       transform:scale(1.02);
       transition:opacity .45s ease, transform .45s ease;
     }
-    .main-content.visible{
-      opacity:1;
-      pointer-events:auto;
-      transform:scale(1);
-    }
+    .main-content.visible{ opacity:1; pointer-events:auto; transform:scale(1); }
 
     .card{
       background: rgba(6,10,14,0.6);
@@ -126,8 +112,63 @@
       text-align:left;
     }
 
-    .card h1{ margin:0 0 6px 0; font-size:22px; }
-    .card p{ margin:8px 0 0 0; color:rgba(223,231,235,0.8); }
+    .login-box{
+      text-align:center;
+    }
+    .login-box input{
+      padding:8px 12px;
+      border-radius:8px;
+      border:none;
+      background:#12181f;
+      color:var(--text);
+      margin-top:8px;
+      width:200px;
+      text-align:center;
+    }
+
+    .note-area{
+      width:100%;
+      min-height:200px;
+      background:#11161d;
+      border-radius:10px;
+      padding:12px;
+      color:var(--text);
+      resize:vertical;
+      border:1px solid rgba(255,255,255,0.05);
+      font-size:14px;
+    }
+    .toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+    .toggle{
+      cursor:pointer;
+      padding:6px 12px;
+      border-radius:6px;
+      background:#182028;
+      border:1px solid rgba(255,255,255,0.08);
+      font-size:13px;
+      color:var(--accent);
+      user-select:none;
+    }
+    .output{
+      margin-top:14px;
+      background:#0e141a;
+      padding:12px;
+      border-radius:10px;
+      min-height:60px;
+      white-space:pre-wrap;
+    }
+
+    .answer.hidden{
+      background:#141a20;
+      color:transparent;
+      text-shadow: 0 0 12px rgba(255,255,255,0.05);
+      border-radius:4px;
+      padding:2px 4px;
+    }
 
     @media (max-width:520px){
       pre.ascii{font-size:14px; padding:18px;}
@@ -146,20 +187,39 @@
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
                      
-                                                     
                      
+                                                                  
+                                                                   
                      </pre>
     </button>
-
     <div class="hint">Click</div>
   </div>
 
   <div class="main-content" id="main">
-    <div class="card">
-      <h1>Welcome inside</h1>
-      <p>This is the landing area revealed after clicking the ASCII art. Replace this block with your real homepage content, a redirect, or further animations.</p>
-      <p style="margin-top:14px;">Suggestions: link this to another page (window.location = '/home.html'), or dynamically load content via fetch().</p>
-      <p style="margin-top:18px; font-size:13px; color:rgba(223,231,235,0.6);">Press <kbd>Esc</kbd> to return to the ASCII art.</p>
+    <div class="card" id="app">
+      <!-- Login Screen -->
+      <div id="loginScreen" class="login-box">
+        <h2>Math Note Taker Login</h2>
+        <p>Enter your name to continue:</p>
+        <input type="text" id="username" placeholder="Your name" />
+        <div style="margin-top:10px;">
+          <button class="toggle" id="loginBtn">Log In</button>
+        </div>
+      </div>
+
+      <!-- Note Taker -->
+      <div id="noteScreen" style="display:none;">
+        <div class="toolbar">
+          <div>👩‍🏫 Teacher Mode: <span id="modeStatus">ON</span></div>
+          <div class="toggle" id="toggleMode">Toggle Mode</div>
+        </div>
+        <textarea id="noteInput" class="note-area" placeholder="Write math notes here. Use LaTeX (like $x^2 + y^2 = z^2$)..."></textarea>
+        <div style="margin-top:10px;">
+          <button class="toggle" id="saveNote">💾 Save</button>
+          <button class="toggle" id="renderNote">🧮 Render</button>
+        </div>
+        <div class="output" id="renderedOutput"></div>
+      </div>
     </div>
   </div>
 
@@ -167,6 +227,18 @@
     const entryBtn = document.getElementById('entry');
     const ascii = document.getElementById('ascii');
     const main = document.getElementById('main');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginScreen = document.getElementById('loginScreen');
+    const noteScreen = document.getElementById('noteScreen');
+    const usernameInput = document.getElementById('username');
+    const modeStatus = document.getElementById('modeStatus');
+    const toggleMode = document.getElementById('toggleMode');
+    const saveNote = document.getElementById('saveNote');
+    const renderNote = document.getElementById('renderNote');
+    const noteInput = document.getElementById('noteInput');
+    const renderedOutput = document.getElementById('renderedOutput');
+
+    let teacherMode = true;
 
     function openSite(){
       ascii.classList.add('fire-glitch');
@@ -197,6 +269,49 @@
     });
 
     ascii.addEventListener('selectstart', (e)=>e.preventDefault());
+
+    // Login
+    loginBtn.addEventListener('click', ()=>{
+      const name = usernameInput.value.trim();
+      if(!name){ alert('Please enter your name'); return; }
+      loginScreen.style.display = 'none';
+      noteScreen.style.display = 'block';
+    });
+
+    // Teacher mode toggle
+    toggleMode.addEventListener('click', ()=>{
+      teacherMode = !teacherMode;
+      modeStatus.textContent = teacherMode ? 'ON' : 'OFF';
+      renderMath();
+    });
+
+    // Save notes
+    saveNote.addEventListener('click', ()=>{
+      localStorage.setItem('mathNotes', noteInput.value);
+      alert('Notes saved!');
+    });
+
+    // Render
+    renderNote.addEventListener('click', renderMath);
+
+    function renderMath(){
+      let content = noteInput.value;
+      // highlight answers with [[answer]]
+      content = content.replace(/\[\[(.*?)\]\]/g, (match, ans)=>{
+        return `<span class="answer ${teacherMode ? 'hidden' : ''}">${ans}</span>`;
+      });
+      renderedOutput.innerHTML = content;
+      if(window.MathJax) MathJax.typesetPromise([renderedOutput]);
+    }
+
+    // Restore notes
+    window.addEventListener('load', ()=>{
+      const saved = localStorage.getItem('mathNotes');
+      if(saved) noteInput.value = saved;
+    });
   </script>
+
+  <!-- MathJax for LaTeX rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </body>
 </html>
