@@ -1,37 +1,197 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Math Notes AI</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- SymPy.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/sympy-js@0.3.0/dist/sympy.min.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Welcome — Click the ASCII Art</title>
+  <style>
+    :root{
+      --bg:#0b0f13;
+      --text:#dfe7eb;
+      --accent:#57c7ff;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      background: radial-gradient(ellipse at 10% 10%, #071018 0%, var(--bg) 40%);
+      color:var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    .container{
+      text-align:center;
+      width:100%;
+      max-width:980px;
+      padding:24px;
+    }
+
+    /* The large ASCII art click target */
+    .entry-button{
+      display:inline-block;
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      padding:12px 18px;
+      line-height:1;
+      transition:transform .18s ease, box-shadow .18s ease;
+      border-radius:8px;
+      outline: none;
+      box-shadow: 0 6px 24px rgba(2,6,10,0.6), inset 0 -1px 0 rgba(255,255,255,0.02);
+    }
+
+    .entry-button:focus{
+      box-shadow: 0 6px 30px rgba(5,120,200,0.18), 0 0 0 4px rgba(87,199,255,0.06);
+    }
+
+    .entry-button:hover{ transform: translateY(-4px) scale(1.01); }
+
+    pre.ascii{
+      margin:0;
+      white-space:pre;
+      font-size:18px;
+      letter-spacing:1px;
+      color:var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      padding:26px 42px;
+      border-radius:10px;
+      border: 1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+      user-select:none;
+      -webkit-user-select:none;
+    }
+
+    .hint{
+      margin-top:18px;
+      color:rgba(223,231,235,0.7);
+      font-size:13px;
+    }
+
+    /* Enter animation */
+    .fade-out{
+      animation:fadeOutAndScale .55s ease forwards;
+    }
+    @keyframes fadeOutAndScale{
+      to{ opacity:0; transform:scale(0.98) translateY(-8px); }
+    }
+
+    /* Main content (hidden until clicked) */
+    .main-content{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(180deg, rgba(3,6,10,0.7), rgba(3,6,10,0.92));
+      color:var(--text);
+      padding:40px;
+      opacity:0;
+      pointer-events:none;
+      transform:scale(1.02);
+      transition:opacity .45s ease, transform .45s ease;
+    }
+    .main-content.visible{
+      opacity:1;
+      pointer-events:auto;
+      transform:scale(1);
+    }
+
+    .card{
+      background: rgba(6,10,14,0.6);
+      border-radius:12px;
+      padding:28px;
+      max-width:880px;
+      width:100%;
+      box-shadow: 0 12px 60px rgba(2,6,12,0.7);
+      border:1px solid rgba(255,255,255,0.03);
+      text-align:left;
+    }
+
+    .card h1{ margin:0 0 6px 0; font-size:22px; }
+    .card p{ margin:8px 0 0 0; color:rgba(223,231,235,0.8); }
+
+    /* Small screen adjustments */
+    @media (max-width:520px){
+      pre.ascii{font-size:14px; padding:18px;}
+      .card{padding:18px}
+    }
+  </style>
 </head>
 <body>
-  <div class="app-container">
-    <header>
-      <h1>📘 Math Notes AI</h1>
-      <p class="subtitle">Solve. Learn. Understand.</p>
-    </header>
+  <div class="container">
+    <!-- The ascii art button. Keyboard accessible. -->
+    <button class="entry-button" id="entry" aria-label="">
+      <pre class="ascii" id="ascii"> ░▒▓██████▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
+░▒▓████████▓▒░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
+                     
+                     </pre>
+    </button>
 
-    <main id="chat-box" class="chat-box">
-      <div class="intro">
-        <p>Ask me a math problem — I’ll solve it and create step-by-step notes!</p>
-        <p class="hint">Try: <code>derivative of x^3 + 2x</code> or <code>integrate sin(x)</code></p>
-      </div>
-    </main>
-
-    <form id="chat-form" class="chat-form">
-      <input id="user-input" type="text" placeholder="Type a math equation or question..." autocomplete="off" />
-      <button type="submit">Send</button>
-    </form>
+    <div class="hint">Click</div>
   </div>
 
-  <footer>
-    <p>Powered by <strong>SymPy.js</strong> + <strong>Render</strong> + <strong>Netlify</strong></p>
-  </footer>
+  <!-- The "inside" content that appears after clicking. Could be replaced by a redirect to another page. -->
+  <div class="main-content" id="main">
+    <div class="card">
+      <h1>Welcome inside</h1>
+      <p>This is the landing area revealed after clicking the ASCII art. Replace this block with your real homepage content, a redirect, or further animations.</p>
+      <p style="margin-top:14px;">Suggestions: link this to another page (window.location = '/home.html'), or dynamically load content via fetch().</p>
+      <p style="margin-top:18px; font-size:13px; color:rgba(223,231,235,0.6);">Press <kbd>Esc</kbd> to return to the ASCII art.</p>
+    </div>
+  </div>
 
-  <script src="script.js"></script>
+  <script>
+    const entryBtn = document.getElementById('entry');
+    const ascii = document.getElementById('ascii');
+    const main = document.getElementById('main');
+
+    function openSite(){
+      // Play a quick animation on the ascii art then show main content
+      entryBtn.classList.add('fade-out');
+      setTimeout(()=>{
+        // hide the ascii area visually and show the main content
+        main.classList.add('visible');
+        entryBtn.style.display = 'none';
+        document.querySelector('.hint').style.display = 'none';
+        // Focus the first focusable element inside main
+        const focusable = main.querySelector('button, [href], input, textarea, select, [tabindex]');
+        if(focusable) focusable.focus();
+      }, 380);
+
+      // If you prefer to redirect to another page instead of revealing content here,
+      // replace the above with: window.location.href = '/your-target-page.html';
+    }
+
+    entryBtn.addEventListener('click', openSite);
+
+    // keyboard accessibility
+    entryBtn.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openSite(); }
+    });
+
+    // allow ESC to go back
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){
+        main.classList.remove('visible');
+        entryBtn.style.display = 'inline-block';
+        entryBtn.classList.remove('fade-out');
+        document.querySelector('.hint').style.display = 'block';
+        entryBtn.focus();
+      }
+    });
+
+    // Optional: make the ascii non-selectable on mobile but still accessible
+    ascii.addEventListener('selectstart', (e)=>e.preventDefault());
+  </script>
 </body>
 </html>
