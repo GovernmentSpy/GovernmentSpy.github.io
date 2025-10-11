@@ -1,436 +1,145 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Math Note Taker AI + Calculus Solver</title>
-  <style>
-    :root{
-      --bg:#0b0f13;
-      --text:#dfe7eb;
-      --accent:#4eb1ff;
-    }
-    html,body{height:100%;}
-    body{
-      margin:0;
-      background: radial-gradient(ellipse at 10% 10%, #071018 0%, var(--bg) 40%);
-      color:var(--text);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Math Note Thing</title>
+<style>
+:root{--bg:#0b0f13;--text:#dfe7eb;--accent:#4eb1ff;}
+html,body{height:100%;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,'Roboto Mono',monospace;}
+body{background:radial-gradient(ellipse at 10% 10%, #071018 0%, var(--bg) 40%);color:var(--text);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.container{width:100%;max-width:980px;padding:24px;text-align:center;}
+.entry-button{border:0;background:transparent;cursor:pointer;padding:12px 18px;line-height:1;border-radius:8px;outline:none;box-shadow:0 6px 24px rgba(2,6,10,0.6), inset 0 -1px 0 rgba(255,255,255,0.02);}
+.entry-button:hover{ transform: translateY(-4px) scale(1.01);}
+pre.ascii{margin:0;white-space:pre;font-size:18px;letter-spacing:1px;color:var(--text);background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:26px 42px;border-radius:10px;border: 1px solid rgba(255,255,255,0.03);box-shadow: 0 8px 40px rgba(0,0,0,0.7);}
+.hint{margin-top:18px;color:rgba(223,231,235,0.7);font-size:13px;}
+.fire-glitch{animation: fireGlitch 0.8s linear forwards;}
+@keyframes fireGlitch{0% {transform:translate(0,0);color:#ff4500;}100% {transform:translate(0,0);color:#ff8c00;}}
+.fade-out{animation: fadeOutAndScale .55s ease forwards;}
+@keyframes fadeOutAndScale{ to{ opacity:0; transform:scale(0.98) translateY(-8px); } }
 
-    .container{
-      text-align:center;
-      width:100%;
-      max-width:980px;
-      padding:24px;
-    }
-
-    .entry-button{
-      display:inline-block;
-      border:0;
-      background:transparent;
-      cursor:pointer;
-      padding:12px 18px;
-      line-height:1;
-      border-radius:8px;
-      outline: none;
-      box-shadow: 0 6px 24px rgba(2,6,10,0.6), inset 0 -1px 0 rgba(255,255,255,0.02);
-    }
-    .entry-button:hover{ transform: translateY(-4px) scale(1.01); }
-
-    pre.ascii{
-      margin:0;
-      white-space:pre;
-      font-size:18px;
-      letter-spacing:1px;
-      color:var(--text);
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-      padding:26px 42px;
-      border-radius:10px;
-      border: 1px solid rgba(255,255,255,0.03);
-      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
-      user-select:none;
-      position: relative;
-    }
-
-    .hint{
-      margin-top:18px;
-      color:rgba(223,231,235,0.7);
-      font-size:13px;
-    }
-
-    @keyframes fireGlitch {
-      0% { transform: translate(0,0) skew(0deg,0deg); color: #ff4500; }
-      5% { transform: translate(-2px,2px) skew(-5deg,5deg); color: #ff6347; }
-      10% { transform: translate(2px,-2px) skew(5deg,-5deg); color: #ff8c00; }
-      15% { transform: translate(-3px,1px) skew(-3deg,3deg); color: #ffa500; }
-      20% { transform: translate(3px,-1px) skew(3deg,-3deg); color: #ff4500; }
-      25% { transform: translate(-4px,2px) skew(-6deg,6deg); color: #ff6347; }
-      30% { transform: translate(4px,-2px) skew(6deg,-6deg); color: #ff8c00; }
-      35% { transform: translate(-2px,3px) skew(-3deg,3deg); color: #ffa500; }
-      40% { transform: translate(2px,-3px) skew(3deg,-3deg); color: #ff4500; }
-      50% { transform: translate(0,0) skew(0deg,0deg); color: #ff6347; }
-      60% { transform: translate(-3px,1px) skew(-5deg,5deg); color: #ff8c00; }
-      70% { transform: translate(3px,-1px) skew(5deg,-5deg); color: #ffa500; }
-      80% { transform: translate(-2px,2px) skew(-4deg,4deg); color: #ff4500; }
-      90% { transform: translate(2px,-2px) skew(4deg,-4deg); color: #ff6347; }
-      100% { transform: translate(0,0) skew(0deg,0deg); color: #ff8c00; }
-    }
-    .fire-glitch { animation: fireGlitch 0.8s linear forwards; }
-    .fade-out{ animation: fadeOutAndScale .55s ease forwards; }
-    @keyframes fadeOutAndScale{ to{ opacity:0; transform:scale(0.98) translateY(-8px); } }
-
-    .main-content{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(180deg, rgba(3,6,10,0.7), rgba(3,6,10,0.92));
-      color:var(--text);
-      padding:40px;
-      opacity:0;
-      pointer-events:none;
-      transform:scale(1.02);
-      transition:opacity .45s ease, transform .45s ease;
-      flex-direction:column;
-      overflow-y:auto;
-    }
-    .main-content.visible{ opacity:1; pointer-events:auto; transform:scale(1); }
-
-    .card{
-      background: rgba(6,10,14,0.6);
-      border-radius:12px;
-      padding:28px;
-      max-width:880px;
-      width:100%;
-      box-shadow: 0 12px 60px rgba(2,6,12,0.7);
-      border:1px solid rgba(255,255,255,0.03);
-      text-align:left;
-      margin-bottom:20px;
-    }
-
-    .note-area{
-      width:100%;
-      min-height:200px;
-      background:#11161d;
-      border-radius:10px;
-      padding:12px;
-      color:var(--text);
-      resize:vertical;
-      border:1px solid rgba(255,255,255,0.05);
-      font-size:14px;
-    }
-    .toolbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom:10px;
-    }
-    .toggle{
-      cursor:pointer;
-      padding:6px 12px;
-      border-radius:6px;
-      background:#182028;
-      border:1px solid rgba(255,255,255,0.08);
-      font-size:13px;
-      color:var(--accent);
-      user-select:none;
-    }
-    .output{
-      margin-top:14px;
-      background:#0e141a;
-      padding:12px;
-      border-radius:10px;
-      min-height:60px;
-      white-space:pre-wrap;
-    }
-
-    .answer.hidden{
-      background:#141a20;
-      color:transparent;
-      text-shadow: 0 0 12px rgba(255,255,255,0.05);
-      border-radius:4px;
-      padding:2px 4px;
-    }
-
-    @media (max-width:520px){
-      pre.ascii{font-size:14px; padding:18px;}
-      .card{padding:18px}
-    }
-  </style>
+.main-content{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(3,6,10,0.7), rgba(3,6,10,0.92));color:var(--text);padding:40px;opacity:0;pointer-events:none;transform:scale(1.02);transition:opacity .45s ease, transform .45s ease;flex-direction:column;overflow-y:auto;}
+.main-content.visible{opacity:1;pointer-events:auto;transform:scale(1);}
+.card{background: rgba(6,10,14,0.6);border-radius:12px;padding:28px;width:100%;max-width:880px;box-shadow:0 12px 60px rgba(2,6,12,0.7);border:1px solid rgba(255,255,255,0.03);text-align:left;}
+.note-area{width:100%;min-height:250px;background:#11161d;border-radius:10px;padding:12px;color:var(--text);resize:vertical;border:1px solid rgba(255,255,255,0.05);font-size:14px;}
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.toggle{cursor:pointer;padding:6px 12px;border-radius:6px;background:#182028;border:1px solid rgba(255,255,255,0.08);font-size:13px;color:var(--accent);user-select:none;}
+.output{margin-top:14px;background:#0e141a;padding:12px;border-radius:10px;min-height:60px;white-space:pre-wrap;font-size:14px;}
+small{display:block;color:#9bb0c0;margin-top:2px;}
+</style>
 </head>
 <body>
-  <div class="container">
-    <button class="entry-button" id="entry" aria-label="Enter site">
-      <pre class="ascii" id="ascii">░▒▓██████▓▒░░▒▓█▓▒░ 
+
+<div class="container" id="entryContainer">
+  <button class="entry-button" id="entryBtn" aria-label="Enter site">
+    <pre class="ascii" id="asciiArt">
+░▒▓██████▓▒░░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
 ░▒▓████████▓▒░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
-                     </pre>
-    </button>
-    <div class="hint">Click</div>
-  </div>
+    </pre>
+  </button>
+  <div class="hint">Click to Enter</div>
+</div>
 
-  <div class="main-content" id="main">
-    <!-- Note Taker -->
-    <div class="card">
-      <div class="toolbar">
-        <div>👩‍🏫 Teacher Mode: <span id="modeStatus">ON</span></div>
-        <div class="toggle" id="toggleMode">Toggle Mode</div>
-      </div>
-      <textarea id="noteInput" class="note-area" placeholder="Write math notes or equations (e.g. 2 + 2, sin(pi/2), or $x^2 + y^2 = z^2$)..."></textarea>
-      <div style="margin-top:10px;">
-        <button class="toggle" id="saveNote">💾 Save</button>
-        <button class="toggle" id="renderNote">🧮 Render</button>
-      </div>
-      <div class="output" id="renderedOutput"></div>
+<div class="main-content" id="mainContent">
+  <div class="card">
+    <div class="toolbar">
+      <div>Teacher Mode: <span id="modeStatus">ON</span></div>
+      <div class="toggle" id="toggleMode">Toggle Mode</div>
     </div>
-
-    <!-- Calculus Solver -->
-    <div class="card">
-      <h2>Calculus Solver</h2>
-      <div style="margin-bottom:10px;">
-        <label>Expression:</label>
-        <input type="text" id="calcExpr" value="x^2 + 3*x + 2" style="width:100%; padding:6px; margin-top:4px;" />
-      </div>
-      <div style="margin-bottom:10px;">
-        <label>Variable:</label>
-        <input type="text" id="calcVar" value="x" style="width:100%; padding:6px; margin-top:4px;" />
-      </div>
-      <div style="margin-bottom:10px;">
-        <label>Operation:</label>
-        <select id="calcOp" style="width:100%; padding:6px; margin-top:4px;">
-          <option value="derivative">Derivative</option>
-          <option value="indefinite-integral">Indefinite Integral</option>
-          <option value="definite-integral">Definite Integral</option>
-          <option value="limit">Limit</option>
-        </select>
-      </div>
-      <div style="margin-bottom:10px;" id="definiteInputs">
-        <label>From (a):</label>
-        <input type="text" id="calcA" value="0" style="width:100%; padding:6px; margin-top:4px;" />
-        <label>To (b):</label>
-        <input type="text" id="calcB" value="1" style="width:100%; padding:6px; margin-top:4px;" />
-      </div>
-      <div style="margin-bottom:10px;" id="limitInput">
-        <label>Limit point:</label>
-        <input type="text" id="calcLimit" value="0" style="width:100%; padding:6px; margin-top:4px;" />
-      </div>
-      <button class="toggle" id="computeCalc">Compute</button>
-      <div class="output" id="calcResult" style="margin-top:10px; min-height:80px;"></div>
-      <div class="output" id="calcSteps" style="margin-top:10px; min-height:80px; background:#11161d;"></div>
+    <textarea id="noteInput" class="note-area" placeholder="Type math expressions naturally, e.g.&#10;x^2 + 3*x + 2&#10;derivative x^2 + 3*x&#10;integrate x^2 + 3*x + 2 from 0 to 1&#10;limit x^2 + 3*x at x=2"></textarea>
+    <div style="margin-top:10px;">
+      <button class="toggle" id="saveNote">Save</button>
+      <button class="toggle" id="renderNote">Compute</button>
     </div>
+    <div class="output" id="renderedOutput"></div>
   </div>
+</div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <script>
-    // Entry animation
-    const entryBtn = document.getElementById('entry');
-    const ascii = document.getElementById('ascii');
-    const main = document.getElementById('main');
-    const hint = document.querySelector('.hint');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+const entryBtn=document.getElementById('entryBtn');
+const asciiArt=document.getElementById('asciiArt');
+const entryContainer=document.getElementById('entryContainer');
+const mainContent=document.getElementById('mainContent');
 
-    const toggleMode = document.getElementById('toggleMode');
-    const modeStatus = document.getElementById('modeStatus');
-    const noteInput = document.getElementById('noteInput');
-    const renderedOutput = document.getElementById('renderedOutput');
-    const saveNote = document.getElementById('saveNote');
-    const renderNote = document.getElementById('renderNote');
+entryBtn.addEventListener('click',()=>{
+  asciiArt.classList.add('fire-glitch');
+  setTimeout(()=>{
+    asciiArt.classList.remove('fire-glitch');
+    entryContainer.classList.add('fade-out');
+    setTimeout(()=>{
+      mainContent.classList.add('visible');
+      entryContainer.style.display='none';
+    }, 380);
+  }, 800);
+});
 
-    let teacherMode = true;
+// --- Smart Solver ---
+const noteInput=document.getElementById('noteInput');
+const renderedOutput=document.getElementById('renderedOutput');
+const toggleMode=document.getElementById('toggleMode');
+const modeStatus=document.getElementById('modeStatus');
+let teacherMode=true;
 
-    function openSite(){
-      ascii.classList.add('fire-glitch');
-      setTimeout(()=>{
-        ascii.classList.remove('fire-glitch');
-        entryBtn.classList.add('fade-out');
-        setTimeout(()=>{
-          main.classList.add('visible');
-          entryBtn.style.display = 'none';
-          hint.style.display = 'none';
-        }, 380);
-      }, 800);
-    }
+toggleMode.addEventListener('click',()=>{
+  teacherMode=!teacherMode;
+  modeStatus.textContent = teacherMode?'ON':'OFF';
+  renderMath();
+});
 
-    entryBtn.addEventListener('click', openSite);
-    entryBtn.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openSite(); }
-    });
+document.getElementById('renderNote').addEventListener('click',renderMath);
+document.getElementById('saveNote').addEventListener('click',()=>{localStorage.setItem('mathNotes',noteInput.value);alert('Notes saved!');});
+window.addEventListener('load',()=>{const s=localStorage.getItem('mathNotes');if(s)noteInput.value=s;});
 
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape'){
-        main.classList.remove('visible');
-        entryBtn.style.display = 'inline-block';
-        entryBtn.classList.remove('fade-out');
-        hint.style.display = 'block';
-        entryBtn.focus();
-      }
-    });
+function numericIntegrate(f,a,b,n=2000){if(a===b)return 0;if(n%2===1)n+=1;const h=(b-a)/n;let s=f(a)+f(b);for(let i=1;i<n;i++){const x=a+i*h;s+=(i%2===0?2:4)*f(x);}return (h/3)*s;}
+function safeEval(expr,xVal,varName){try{const s={};s[varName]=xVal;return math.evaluate(expr,s);}catch{return NaN;}}
+function trySymbolicIntegral(fnStr,varName){const m=fnStr.match(new RegExp(`^\\s*([+-]?\\d*(?:\\.\\d+)?)?\\s*${varName}(?:\\^(\\-?\\d+))?\\s*$`));if(m){const a=m[1]?Number(m[1]):1;const n=m[2]?Number(m[2]):1;return `${a/(n+1)}${varName}^${n+1} + C`;}return null;}
+function buildDerivativeSteps(expr,v,der){return `Formula: d/d${v}[${expr}] = n*x^(n-1)\nSteps: differentiate each term, simplify\nResult: ${der}`;}
+function buildIntegralSteps(expr,v,intRes){return `Formula: ∫x^n dx = x^(n+1)/(n+1) + C\nSteps: apply to each term\nResult: ${intRes}`;}
+function buildDefIntSteps(expr,v,a,b,val){return `Formula: ∫_a^b f(${v}) dx\nCompute numeric integration (Simpson's rule) from ${a} to ${b}\nResult ≈ ${val}`;}
+function buildLimitSteps(expr,v,x0,approx){return `Formula: lim ${v}->${x0} ${expr}\nSteps: approach from left/right\nApprox result: ${approx}`;}
 
-    ascii.addEventListener('selectstart', (e)=>e.preventDefault());
+function renderMath(){
+  const lines=noteInput.value.split(/\n+/);
+  let html='';
+  lines.forEach(line=>{
+    if(!line.trim()){html+='<br>';return;}
+    try{
+      let processed=false;
+      let l=line.toLowerCase();
 
-    toggleMode.addEventListener('click', ()=>{
-      teacherMode = !teacherMode;
-      modeStatus.textContent = teacherMode ? 'ON' : 'OFF';
-      renderMath();
-    });
-
-    saveNote.addEventListener('click', ()=>{
-      localStorage.setItem('mathNotes', noteInput.value);
-      alert('Notes saved!');
-    });
-
-    renderNote.addEventListener('click', renderMath);
-
-    function renderMath(){
-      let content = noteInput.value;
-      let lines = content.split(/\n+/);
-      let resultHTML = '';
-
-      lines.forEach(line=>{
-        if(line.trim()===''){ resultHTML += '\n'; return; }
-
-        // Detect LaTeX
-        if(line.includes('$')){
-          resultHTML += line + '\n';
-        } else {
-          try{
-            let evaluated = math.evaluate(line);
-            resultHTML += `${line} = <strong>${evaluated}</strong>\n`;
-          }catch{
-            resultHTML += line + '\n';
-          }
-        }
-      });
-
-      resultHTML = resultHTML.replace(/\[\[(.*?)\]\]/g, (m,ans)=>
-        `<span class="answer ${teacherMode ? 'hidden' : ''}">${ans}</span>`
-      );
-
-      renderedOutput.innerHTML = resultHTML;
-      if(window.MathJax) MathJax.typesetPromise([renderedOutput]);
-    }
-
-    window.addEventListener('load', ()=>{
-      const saved = localStorage.getItem('mathNotes');
-      if(saved) noteInput.value = saved;
-    });
-
-    // --- Calculus Solver ---
-    const calcExpr = document.getElementById('calcExpr');
-    const calcVar = document.getElementById('calcVar');
-    const calcOp = document.getElementById('calcOp');
-    const calcA = document.getElementById('calcA');
-    const calcB = document.getElementById('calcB');
-    const calcLimit = document.getElementById('calcLimit');
-    const calcResult = document.getElementById('calcResult');
-    const calcSteps = document.getElementById('calcSteps');
-    const definiteInputs = document.getElementById('definiteInputs');
-    const limitInput = document.getElementById('limitInput');
-
-    function numericIntegrate(f, aNum, bNum, n=2000){
-      if(aNum === bNum) return 0;
-      if(n%2===1) n+=1;
-      const h = (bNum-aNum)/n;
-      let s = f(aNum)+f(bNum);
-      for(let i=1;i<n;i++){
-        const x = aNum+i*h;
-        s += (i%2===0 ? 2 : 4)*f(x);
-      }
-      return (h/3)*s;
-    }
-
-    function safeEval(expr, xVal, variable){
-      try{
-        const scope = {}; scope[variable]=xVal;
-        const val = math.evaluate(expr, scope);
-        return typeof val==='number'? val : Number(val.valueOf());
-      }catch{return NaN;}
-    }
-
-    function buildDerivativeSteps(fn,varName,der){
-      return `Derivative result: ${der}\nPower rule and chain/product rules applied as needed.`;
-    }
-
-    function buildLimitExplanation(exprStr, varName, x0, vals){
-      let s = `Approx limit as ${varName}->${x0}:\n`;
-      vals.forEach(v=>{
-        s += `h=${v.h}: left=${v.left}, right=${v.right}, avg=${v.avg}\n`;
-      });
-      s += "If left/right converge as h->0, that's the limit.";
-      return s;
-    }
-
-    function trySymbolicIntegral(fnStr, varName){
-      const regex = new RegExp(`^\\s*([+-]?\\d*(?:\\.\\d+)?)?\\s*${varName}(?:\\^(\\-?\\d+))?\\s*$`);
-      const m = fnStr.match(regex);
-      if(m){
-        const aCoeff = m[1]?Number(m[1]):1;
-        const n = m[2]?Number(m[2]):1;
-        return `${aCoeff/(n+1)}${varName}^${n+1} + C`;
-      }
-      return null;
-    }
-
-    function compute(){
-      const expr = calcExpr.value;
-      const variable = calcVar.value;
-      const operation = calcOp.value;
-      let steps='', result='';
-
-      try{
-        if(operation==='derivative'){
-          const der = math.derivative(expr, variable).toString();
-          result = der;
-          steps = buildDerivativeSteps(expr, variable, der);
-        } else if(operation==='indefinite-integral'){
-          const integral = trySymbolicIntegral(expr, variable);
-          if(integral){
-            result = integral;
-            steps = "Indefinite integral rules applied.";
-          }else{
-            result = "Cannot compute symbolic integral. Use definite integral for numeric.";
-          }
-        } else if(operation==='definite-integral'){
-          const a = parseFloat(calcA.value);
-          const b = parseFloat(calcB.value);
-          const val = numericIntegrate(x=>safeEval(expr,x,variable), a, b);
-          result = val;
-          steps = `Numeric integration using Simpson's rule from ${a} to ${b} ≈ ${val}`;
-        } else if(operation==='limit'){
-          const x0 = parseFloat(calcLimit.value);
-          const eps = [1e-1,1e-2,1e-3,1e-4,1e-5,1e-6];
-          const vals = eps.map(h=>{
-            const left = safeEval(expr, x0-h, variable);
-            const right = safeEval(expr, x0+h, variable);
-            return {h,left,right,avg:(left+right)/2};
-          });
-          result = vals[vals.length-1].avg;
-          steps = buildLimitExplanation(expr, variable, x0, vals);
-        }
-      }catch(e){
-        result = "Error: "+e;
+      if(l.startsWith('derivative')){
+        const m=line.match(/derivative\s+(.*)/i);
+        if(m){let expr=m[1].trim();let v='x';let der=math.derivative(expr,v).toString();html+=`${line} = <strong>${der}</strong>`+(teacherMode?`<small>${buildDerivativeSteps(expr,v,der)}</small>`:'')+'<br>';processed=true;}
       }
 
-      calcResult.innerHTML = result;
-      calcSteps.innerHTML = steps;
-    }
+      if(!processed && l.startsWith('integrate')){
+        const m=line.match(/integrate\s+(.*)/i);
+        if(m){let expr=m[1].trim();let v='x';let val=trySymbolicIntegral(expr,v)||'Cannot compute';html+=`${line} = <strong>${val}</strong>`+(teacherMode?`<small>${buildIntegralSteps(expr,v,val)}</small>`:'')+'<br>';processed=true;}
+      }
 
-    calcOp.addEventListener('change', ()=>{
-      definiteInputs.style.display = calcOp.value==='definite-integral'?'block':'none';
-      limitInput.style.display = calcOp.value==='limit'?'block':'none';
-    });
+      if(!processed && l.includes('from') && l.includes('to')){
+        const m=line.match(/(.*) from (.*) to (.*)/i);
+        if(m){let expr=m[1].replace(/integrate/i,'').trim();let a=parseFloat(m[2]);let b=parseFloat(m[3]);let val=numericIntegrate(x=>safeEval(expr,x,'x'),a,b);html+=`${line} = <strong>${val}</strong>`+(teacherMode?`<small>${buildDefIntSteps(expr,'x',a,b,val)}</small>`:'')+'<br>';processed=true;}
+      }
 
-    document.getElementById('computeCalc').addEventListener('click', compute);
-  </script>
+      if(!processed && l.startsWith('limit')){
+        const m=line.match(/limit\s+(.*)\s+at\s+x\s*=\s*(.*)/i);
+        if(m){let expr=m[1].trim();let x0=parseFloat(m[2]);let eps=[1e-1,1e-2,1e-3,1e-4,1e-5,1e-6];let vals=eps.map(h=>{const l=safeEval(expr,x0-h,'x');const r=safeEval(expr,x0+h,'x');return (l+r)/2});let approx=vals[vals.length-1];html+=`${line} = <strong>${approx}</strong>`+(teacherMode?`<small>${buildLimitSteps(expr,'x',x0,approx)}</small>`:'')+'<br>';processed=true;}
+      }
+
+      if(!processed){try{let val=math.evaluate(line);html+=`${line} = <strong>${val}</strong><br>`;}catch{html+=line+'<br>';}}
+    }catch(e){html+=line+'<br>';}
+  });
+  renderedOutput.innerHTML=html;
+  if(window.MathJax) MathJax.typesetPromise([renderedOutput]);
+}
+</script>
 </body>
 </html>
