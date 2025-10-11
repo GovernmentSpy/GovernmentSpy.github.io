@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Math Note Taker</title>
+  <title>Math Note Taker AI</title>
   <style>
     :root{
       --bg:#0b0f13;
@@ -54,7 +54,6 @@
       border: 1px solid rgba(255,255,255,0.03);
       box-shadow: 0 8px 40px rgba(0,0,0,0.7);
       user-select:none;
-      -webkit-user-select:none;
       position: relative;
     }
 
@@ -112,20 +111,6 @@
       text-align:left;
     }
 
-    .login-box{
-      text-align:center;
-    }
-    .login-box input{
-      padding:8px 12px;
-      border-radius:8px;
-      border:none;
-      background:#12181f;
-      color:var(--text);
-      margin-top:8px;
-      width:200px;
-      text-align:center;
-    }
-
     .note-area{
       width:100%;
       min-height:200px;
@@ -179,61 +164,46 @@
 <body>
   <div class="container">
     <button class="entry-button" id="entry" aria-label="Enter site">
-      <pre class="ascii" id="ascii">  ░▒▓██████▓▒░░▒▓█▓▒░ 
+      <pre class="ascii" id="ascii">░▒▓██████▓▒░░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
 ░▒▓████████▓▒░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
 ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
-                                                              
                      </pre>
     </button>
     <div class="hint">Click</div>
   </div>
 
   <div class="main-content" id="main">
-    <div class="card" id="app">
-      <!-- Login Screen -->
-      <div id="loginScreen" class="login-box">
-        <h2>Math Note Taker Login</h2>
-        <p>Enter your name to continue:</p>
-        <input type="text" id="username" placeholder="Your name" />
-        <div style="margin-top:10px;">
-          <button class="toggle" id="loginBtn">Log In</button>
-        </div>
+    <div class="card">
+      <div class="toolbar">
+        <div>👩‍🏫 Teacher Mode: <span id="modeStatus">ON</span></div>
+        <div class="toggle" id="toggleMode">Toggle Mode</div>
       </div>
-
-      <!-- Note Taker -->
-      <div id="noteScreen" style="display:none;">
-        <div class="toolbar">
-          <div>👩‍🏫 Teacher Mode: <span id="modeStatus">ON</span></div>
-          <div class="toggle" id="toggleMode">Toggle Mode</div>
-        </div>
-        <textarea id="noteInput" class="note-area" placeholder="Write math notes here. Use LaTeX (like $x^2 + y^2 = z^2$)..."></textarea>
-        <div style="margin-top:10px;">
-          <button class="toggle" id="saveNote">💾 Save</button>
-          <button class="toggle" id="renderNote">🧮 Render</button>
-        </div>
-        <div class="output" id="renderedOutput"></div>
+      <textarea id="noteInput" class="note-area" placeholder="Write math notes or equations (e.g. 2 + 2, sin(pi/2), or $x^2 + y^2 = z^2$)..."></textarea>
+      <div style="margin-top:10px;">
+        <button class="toggle" id="saveNote">💾 Save</button>
+        <button class="toggle" id="renderNote">🧮 Render</button>
       </div>
+      <div class="output" id="renderedOutput"></div>
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
   <script>
     const entryBtn = document.getElementById('entry');
     const ascii = document.getElementById('ascii');
     const main = document.getElementById('main');
-    const loginBtn = document.getElementById('loginBtn');
-    const loginScreen = document.getElementById('loginScreen');
-    const noteScreen = document.getElementById('noteScreen');
-    const usernameInput = document.getElementById('username');
-    const modeStatus = document.getElementById('modeStatus');
+    const hint = document.querySelector('.hint');
+
     const toggleMode = document.getElementById('toggleMode');
-    const saveNote = document.getElementById('saveNote');
-    const renderNote = document.getElementById('renderNote');
+    const modeStatus = document.getElementById('modeStatus');
     const noteInput = document.getElementById('noteInput');
     const renderedOutput = document.getElementById('renderedOutput');
+    const saveNote = document.getElementById('saveNote');
+    const renderNote = document.getElementById('renderNote');
 
     let teacherMode = true;
 
@@ -245,7 +215,7 @@
         setTimeout(()=>{
           main.classList.add('visible');
           entryBtn.style.display = 'none';
-          document.querySelector('.hint').style.display = 'none';
+          hint.style.display = 'none';
         }, 380);
       }, 800);
     }
@@ -260,48 +230,55 @@
         main.classList.remove('visible');
         entryBtn.style.display = 'inline-block';
         entryBtn.classList.remove('fade-out');
-        document.querySelector('.hint').style.display = 'block';
+        hint.style.display = 'block';
         entryBtn.focus();
       }
     });
 
     ascii.addEventListener('selectstart', (e)=>e.preventDefault());
 
-    // Login
-    loginBtn.addEventListener('click', ()=>{
-      const name = usernameInput.value.trim();
-      if(!name){ alert('Please enter your name'); return; }
-      loginScreen.style.display = 'none';
-      noteScreen.style.display = 'block';
-    });
-
-    // Teacher mode toggle
     toggleMode.addEventListener('click', ()=>{
       teacherMode = !teacherMode;
       modeStatus.textContent = teacherMode ? 'ON' : 'OFF';
       renderMath();
     });
 
-    // Save notes
     saveNote.addEventListener('click', ()=>{
       localStorage.setItem('mathNotes', noteInput.value);
       alert('Notes saved!');
     });
 
-    // Render
     renderNote.addEventListener('click', renderMath);
 
     function renderMath(){
       let content = noteInput.value;
-      // highlight answers with [[answer]]
-      content = content.replace(/\[\[(.*?)\]\]/g, (match, ans)=>{
-        return `<span class="answer ${teacherMode ? 'hidden' : ''}">${ans}</span>`;
+      let lines = content.split(/\n+/);
+      let resultHTML = '';
+
+      lines.forEach(line=>{
+        if(line.trim()===''){ resultHTML += '\n'; return; }
+
+        // Detect LaTeX
+        if(line.includes('$')){
+          resultHTML += line + '\n';
+        } else {
+          try{
+            let evaluated = math.evaluate(line);
+            resultHTML += `${line} = <strong>${evaluated}</strong>\n`;
+          }catch{
+            resultHTML += line + '\n';
+          }
+        }
       });
-      renderedOutput.innerHTML = content;
+
+      resultHTML = resultHTML.replace(/\[\[(.*?)\]\]/g, (m,ans)=>
+        `<span class="answer ${teacherMode ? 'hidden' : ''}">${ans}</span>`
+      );
+
+      renderedOutput.innerHTML = resultHTML;
       if(window.MathJax) MathJax.typesetPromise([renderedOutput]);
     }
 
-    // Restore notes
     window.addEventListener('load', ()=>{
       const saved = localStorage.getItem('mathNotes');
       if(saved) noteInput.value = saved;
