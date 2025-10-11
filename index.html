@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Math 55B Solver</title>
+<title>Math 55B Full Solver</title>
 <style>
 :root{--bg:#0b0f13;--text:#dfe7eb;--accent:#4eb1ff;}
 html,body{height:100%;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,'Roboto Mono',monospace;}
@@ -48,7 +48,11 @@ small{display:block;color:#9bb0c0;margin-top:2px;}
       <div>👩‍🏫 Teacher Mode: <span id="modeStatus">ON</span></div>
       <div class="toggle" id="toggleMode">Toggle Mode</div>
     </div>
-    <textarea id="noteInput" class="note-area" placeholder="Type math expressions naturally, e.g.\nderivative x^2*y + sin(y*z) with respect to x\nintegrate x*y dx dy dz\nlimit x^2 + 3*x at x=2"></textarea>
+    <textarea id="noteInput" class="note-area" placeholder="Type math expressions naturally, e.g.
+derivative x^2*y + sin(y*z) with respect to x,y
+integrate x*y dx dy
+limit x^2 + y^2 at x=1,y=2
+x^2 + 3*x + 2"></textarea>
     <div style="margin-top:10px;">
       <button class="toggle" id="saveNote">💾 Save</button>
       <button class="toggle" id="renderNote">🧮 Compute</button>
@@ -59,90 +63,125 @@ small{display:block;color:#9bb0c0;margin-top:2px;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script>
-const entryBtn = document.getElementById('entryBtn');
-const asciiArt = document.getElementById('asciiArt');
-const entryContainer = document.getElementById('entryContainer');
-const mainContent = document.getElementById('mainContent');
-entryBtn.addEventListener('click', () => {
-  asciiArt.classList.add('fire-glitch');
-  setTimeout(() => {
-    asciiArt.classList.remove('fire-glitch');
-    entryContainer.classList.add('fade-out');
-    setTimeout(() => { mainContent.classList.add('visible'); entryContainer.style.display = 'none'; }, 380);
-  }, 800);
-});
+const entryBtn=document.getElementById('entryBtn');
+const asciiArt=document.getElementById('asciiArt');
+const entryContainer=document.getElementById('entryContainer');
+const mainContent=document.getElementById('mainContent');
+entryBtn.addEventListener('click',()=>{asciiArt.classList.add('fire-glitch');setTimeout(()=>{asciiArt.classList.remove('fire-glitch');entryContainer.classList.add('fade-out');setTimeout(()=>{mainContent.classList.add('visible');entryContainer.style.display='none';},380);},800);});
 
-const noteInput = document.getElementById('noteInput');
-const renderedOutput = document.getElementById('renderedOutput');
-const toggleMode = document.getElementById('toggleMode');
-const modeStatus = document.getElementById('modeStatus');
-let teacherMode = true;
+const noteInput=document.getElementById('noteInput');
+const renderedOutput=document.getElementById('renderedOutput');
+const toggleMode=document.getElementById('toggleMode');
+const modeStatus=document.getElementById('modeStatus');
+let teacherMode=true;
+toggleMode.addEventListener('click',()=>{teacherMode=!teacherMode;modeStatus.textContent=teacherMode?'ON':'OFF';renderMath();});
+document.getElementById('renderNote').addEventListener('click',renderMath);
+document.getElementById('saveNote').addEventListener('click',()=>{localStorage.setItem('mathNotes',noteInput.value);alert('Notes saved!');});
+window.addEventListener('load',()=>{const saved=localStorage.getItem('mathNotes');if(saved)noteInput.value=saved;});
 
-toggleMode.addEventListener('click', () => { teacherMode = !teacherMode; modeStatus.textContent = teacherMode ? 'ON' : 'OFF'; renderMath(); });
-document.getElementById('renderNote').addEventListener('click', renderMath);
-document.getElementById('saveNote').addEventListener('click', () => { localStorage.setItem('mathNotes', noteInput.value); alert('Notes saved!'); });
-window.addEventListener('load', () => { const saved = localStorage.getItem('mathNotes'); if (saved) noteInput.value = saved; });
-
-function parseExpression(line) {
-  let l = line.trim();
-  if (l.toLowerCase().startsWith('derivative')) {
-    let m = l.match(/derivative\s+(.*?)(?:\s+with respect to\s+([a-z]))?$/i);
-    if (m) return { type: 'derivative', expr: m[1].trim(), var: m[2] || 'x' };
-  } else if (l.toLowerCase().startsWith('integrate')) {
-    let vars = (l.match(/d([a-z])/gi) || []).map(v => v[1]);
-    let expr = l.replace(/integrate|d[a-z]/gi, '').trim();
-    return { type: 'integrate', expr: expr, vars: vars };
-  } else if (l.toLowerCase().startsWith('limit')) {
-    let m = l.match(/limit\s+(.*)\s+at\s+([a-z])\s*=\s*(.*)/i);
-    if (m) return { type: 'limit', expr: m[1].trim(), var: m[2], point: parseFloat(m[3]) };
+// Parse expressions
+function parseExpression(line){
+  let l=line.trim();
+  if(l.toLowerCase().startsWith('derivative')){
+    let m=l.match(/derivative\s+(.*?)(?:\s+with respect to\s+([a-z, ]+))?$/i);
+    if(m){return {type:'derivative',expr:m[1].trim(),vars:(m[2]||'x').split(',').map(v=>v.trim())};}
+  } else if(l.toLowerCase().startsWith('integrate')){
+    let vars=(l.match(/d([a-z])/gi)||[]).map(v=>v[1]);
+    let expr=l.replace(/integrate|d[a-z]/gi,'').trim();
+    return {type:'integrate',expr:expr,vars:vars};
+  } else if(l.toLowerCase().startsWith('limit')){
+    let m=l.match(/limit\s+(.*)\s+at\s+(.+)/i);
+    if(m){
+      let assignments=m[2].split(',').map(a=>a.split('=').map(s=>s.trim()));
+      let points={};
+      assignments.forEach(a=>{points[a[0]]=parseFloat(a[1])});
+      return {type:'limit',expr:m[1].trim(),points:points};
+    }
+  } else if(l.match(/x\^2|y\^2|z\^2|[+-]?\d+\*?[a-z]/i)){
+    return {type:'algebra',expr:l};
   }
-  return { type: 'eval', expr: l };
+  return {type:'eval',expr:l};
 }
 
-function derivativeSteps(expr, v) {
-  try { const d = math.derivative(expr, v).toString(); return `d/d${v}[${expr}] = ${d} (power/chain/product rules applied)`; } catch { return 'Cannot compute derivative.'; }
+// Symbolic simplification function
+function simplifySteps(expr){
+  let steps='';
+  try{
+    let simplified = math.simplify(expr).toString();
+    if(teacherMode){
+      steps += `\\\\( ${expr} \\to ${simplified} \\\\)\\\\\n`;
+    }
+    return {result: simplified, steps};
+  }catch{return {result:expr, steps:'Cannot simplify'};}
 }
 
-function integralSteps(expr, vars) {
-  let result = expr; let steps = '';
-  vars.forEach(v => {
-    try {
-      const integral = `∫${result} d${v}`;
-      steps += `Integrate w.r.t ${v}: ${integral}\n`;
-      result = integral;
-    } catch {
-      steps += `Cannot integrate w.r.t ${v}\n`;
+// Derivatives
+function derivativeSteps(expr, vars){
+  let steps='', result=expr;
+  vars.forEach(v=>{
+    try{
+      const d=math.derivative(result,v).toString();
+      const s = simplifySteps(d);
+      steps += `\\\\(\\frac{\\partial}{\\partial ${v}}(${result}) = ${s.result})\\\\\n` + s.steps;
+      result = s.result;
+    }catch{steps += `Cannot differentiate w.r.t ${v}\\\\\n`;}
+  });
+  return {result,steps};
+}
+
+// Integrals
+function integralSteps(expr, vars){
+  let steps='', result=expr;
+  vars.forEach(v=>{
+    try{
+      let intExpr = math.integral(result, v).toString();
+      const s = simplifySteps(intExpr);
+      steps += `\\\\(\\int ${result} \\, d${v} = ${s.result}\\\\)\\\\\n` + s.steps;
+      result = s.result;
+    }catch{steps += `Cannot integrate w.r.t ${v}\\\\\n`;}
+  });
+  return {result, steps};
+}
+
+// Limits
+function limitSteps(expr, points){
+  let steps='', approx=NaN;
+  try{
+    let scope=Object.assign({},points);
+    approx=math.evaluate(expr,scope);
+    steps = `Approximate evaluation: ${JSON.stringify(points)} => ${approx}`;
+  }catch{steps='Cannot compute limit'}
+  return {result: approx, steps};
+}
+
+// Algebra simplification
+function algebraSteps(expr){return simplifySteps(expr);}
+
+// Render function
+function renderMath(){
+  let lines=noteInput.value.split(/\n+/);
+  let html='';
+  lines.forEach(line=>{
+    if(!line.trim()){html+='<br>';return;}
+    let parsed=parseExpression(line);
+    if(parsed.type==='derivative'){
+      let res=derivativeSteps(parsed.expr,parsed.vars);
+      html+=teacherMode?`${line} = <strong>${res.result}</strong><small>${res.steps}</small><br>`:`${line} = <strong>${res.result}</strong><br>`;
+    } else if(parsed.type==='integrate'){
+      let res=integralSteps(parsed.expr,parsed.vars);
+      html+=teacherMode?`${line} = <strong>${res.result}</strong><small>${res.steps}</small><br>`:`${line} = <strong>${res.result}</strong><br>`;
+    } else if(parsed.type==='limit'){
+      let res=limitSteps(parsed.expr,parsed.points);
+      html+=teacherMode?`${line} = <strong>${res.result}</strong><small>${res.steps}</small><br>`:`${line} = <strong>${res.result}</strong><br>`;
+    } else if(parsed.type==='algebra'){
+      let res=algebraSteps(parsed.expr);
+      html+=teacherMode?`${line} = <strong>${res.result}</strong><small>${res.steps}</small><br>`:`${line} = <strong>${res.result}</strong><br>`;
+    } else{
+      try{let val=math.evaluate(parsed.expr); html+=`${line} = <strong>${val}</strong><br>`;}catch{html+=line+'<br>';}
     }
   });
-  return { result, steps };
-}
-
-function safeEval(expr, val, varName) { try { const scope = {}; scope[varName] = val; return math.evaluate(expr, scope); } catch { return NaN; } }
-
-function renderMath() {
-  let lines = noteInput.value.split(/\n+/);
-  let html = '';
-  lines.forEach(line => {
-    if (!line.trim()) { html += '<br>'; return; }
-    let parsed = parseExpression(line);
-    if (parsed.type === 'derivative') {
-      let d;
-      try { d = math.derivative(parsed.expr, parsed.var).toString(); } catch { d = 'Cannot compute'; }
-      html += line + ' = <strong>' + d + '</strong>' + (teacherMode ? `<small>${derivativeSteps(parsed.expr, parsed.var)}</small>` : '') + '<br>';
-    } else if (parsed.type === 'integrate') {
-      const res = integralSteps(parsed.expr, parsed.vars);
-      html += line + ' = <strong>' + res.result + '</strong>' + (teacherMode ? `<small>${res.steps}</small>` : '') + '<br>';
-    } else if (parsed.type === 'limit') {
-      let approx = safeEval(parsed.expr, parsed.point, parsed.var);
-      html += line + ' = <strong>' + approx + '</strong>' + (teacherMode ? `<small>Limit approximated</small>` : '') + '<br>';
-    } else {
-      let val;
-      try { val = math.evaluate(parsed.expr); } catch { val = 'Error'; }
-      html += line + ' = <strong>' + val + '</strong><br>';
-    }
-  });
-  renderedOutput.innerHTML = html;
-  if (window.MathJax) MathJax.typesetPromise([renderedOutput]);
+  renderedOutput.innerHTML=html;
+  if(window.MathJax) MathJax.typesetPromise([renderedOutput]);
 }
 </script>
 </body>
