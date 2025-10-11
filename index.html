@@ -101,21 +101,13 @@ function numericIntegrate(f,a,b,n=2000){if(a===b)return 0;if(n%2===1)n+=1;const 
 function safeEval(expr,val,varName){try{const scope={};scope[varName]=val;return math.evaluate(expr,scope);}catch{return NaN;}}
 function trySymbolicIntegral(fnStr,varName){const m=fnStr.match(new RegExp(`^\\s*([+-]?\\d*(?:\\.\\d+)?)?\\s*${varName}(?:\\^(\\-?\\d+))?\\s*$`));if(m){const a=m[1]?Number(m[1]):1;const n=m[2]?Number(m[2]):1;return `${a/(n+1)}${varName}^${n+1} + C`;}return null;}
 
-// Steps
-function buildDerivativeSteps(expr,v,der){
-  const terms=expr.split(/(?=[+-])/).map(t=>t.trim());
-  let steps='';
-  terms.forEach((t,i)=>{if(t){let d=math.derivative(t,v).toString();steps+=`Step ${i+1}: d/d${v}[${t}] = ${d}\n`;}}); steps+=`Combine: ${der}`; return steps;
-}
-function buildIntegralSteps(expr,v,res){
-  const terms=expr.split(/(?=[+-])/).map(t=>t.trim());
-  let steps='';
-  terms.forEach((t,i)=>{if(t){let r=trySymbolicIntegral(t,v)||'Cannot compute';steps+=`Step ${i+1}: ∫${t} d${v} = ${r}\n`;}}); steps+=`Combine: ${res}`;return steps;
-}
+// Steps builders
+function buildDerivativeSteps(expr,v,der){const terms=expr.split(/(?=[+-])/).map(t=>t.trim());let steps='';terms.forEach((t,i)=>{if(t){let d=math.derivative(t,v).toString();steps+=`Step ${i+1}: d/d${v}[${t}] = ${d}\n`;}});steps+=`Combine: ${der}`;return steps;}
+function buildLimitSteps(expr,v,x0,approx){return `Formula: lim ${v}->${x0} ${expr}\nSteps: approach from left/right\nApprox result: ${approx}`;}
+function buildIntegralSteps(expr,v,res){const terms=expr.split(/(?=[+-])/).map(t=>t.trim());let steps='';terms.forEach((t,i)=>{if(t){let r=trySymbolicIntegral(t,v)||'Cannot compute';steps+=`Step ${i+1}: ∫${t} d${v} = ${r}\n`;}});steps+=`Combine: ${res}`;return steps;}
 function buildDefIntSteps(expr,v,a,b,val){return `Formula: ∫_a^b f(${v}) d${v}\nCompute numeric integration (Simpson's rule) from ${a} to ${b}\nResult ≈ ${val}`;}
 function buildDoubleIntSteps(expr,innerVar,outerVar,a1,b1,a2,b2,val){return `Double integral steps:\n1. Integrate w.r.t ${innerVar} over [${a1},${b1}]\n2. Integrate w.r.t ${outerVar} over [${a2},${b2}]\nResult ≈ ${val}`;}
 function buildTripleIntSteps(expr,v1,v2,v3,a1,b1,a2,b2,a3,b3,val){return `Triple integral steps:\n1. Integrate w.r.t ${v1} over [${a1},${b1}]\n2. Integrate w.r.t ${v2} over [${a2},${b2}]\n3. Integrate w.r.t ${v3} over [${a3},${b3}]\nResult ≈ ${val}`;}
-function buildLimitSteps(expr,v,x0,approx){return `Formula: lim ${v}->${x0} ${expr}\nSteps: approach from left/right\nApprox result: ${approx}`;}
 
 function renderMath(){
   const lines=noteInput.value.split(/\n+/);
@@ -138,22 +130,6 @@ function renderMath(){
         }
       }
 
-      // Integrals (single, double, triple)
-      if(!processed && l.startsWith('integrate')){
-        const regexTriple=/integrate\s+(.*?)\s+([a-z])\s*dx\s+([a-z])\s*dy\s+([a-z])\s*dz(?:\s+from\s+(-?\d+\.?\d*)\s+to\s+(-?\d+\.?\d*))?(?:\s+from\s+(-?\d+\.?\d*)\s+to\s+(-?\d+\.?\d*))?(?:\s+from\s+(-?\d+\.?\d*)\s+to\s+(-?\d+\.?\d*))?/i;
-        const triple=regexTriple.exec(line);
-        if(triple){
-          const expr=triple[1].trim();
-          const v1=triple[2], v2=triple[3], v3=triple[4];
-          const a1=parseFloat(triple[5]), b1=parseFloat(triple[6]);
-          const a2=parseFloat(triple[7]), b2=parseFloat(triple[8]);
-          const a3=parseFloat(triple[9]), b3=parseFloat(triple[10]);
-          let val=(a1!=NaN&&b1!=NaN&&a2!=NaN&&b2!=NaN&&a3!=NaN&&b3!=NaN)?numericIntegrate(x=>numericIntegrate(y=>numericIntegrate(z=>safeEval(expr,z,v3),a3,b3),a2,b2),a1,b1):'Cannot compute';
-          html+=teacherMode?`${line} = <strong>${val}</strong><small>${buildTripleIntSteps(expr,v1,v2,v3,a1,b1,a2,b2,a3,b3,val)}</small><br>`:`${line} = <strong>${val}</strong><br>`;
-          processed=true;
-        }
-      }
-
       // Limits
       if(!processed && l.startsWith('limit')){
         const m=line.match(/limit\s+(.*)\s+at\s+x\s*=\s*(.*)/i);
@@ -164,6 +140,23 @@ function renderMath(){
           const vals=eps.map(h=>{const l=safeEval(expr,x0-h,'x'); const r=safeEval(expr,x0+h,'x'); return (l+r)/2;});
           const approx=vals[vals.length-1];
           html+=teacherMode?`${line} = <strong>${approx}</strong><small>${buildLimitSteps(expr,'x',x0,approx)}</small><br>`:`${line} = <strong>${approx}</strong><br>`;
+          processed=true;
+        }
+      }
+
+      // Symbolic triple integrals
+      if(!processed && l.startsWith('integrate')){
+        const symTriple = /integrate\s+(.*?)\s+([a-z])\s+([a-z])\s+([a-z])/i.exec(line);
+        if(symTriple){
+          const expr = symTriple[1].trim();
+          const v1 = symTriple[2], v2 = symTriple[3], v3 = symTriple[4];
+          const step1 = trySymbolicIntegral(expr, v1) || `${expr} d${v1} (cannot compute)`;
+          const step2 = trySymbolicIntegral(step1.replace('+ C',''), v2) || `${step1} d${v2} (cannot compute)`;
+          const step3 = trySymbolicIntegral(step2.replace('+ C',''), v3) || `${step2} d${v3} (cannot compute)`;
+          const result = step3 + ' + C';
+          html += teacherMode
+            ? `${line} = <strong>${result}</strong><small>Step1: ∫${expr} d${v1} = ${step1}<br>Step2: ∫${step1} d${v2} = ${step2}<br>Step3: ∫${step2} d${v3} = ${step3}<br>Combine: ${result}</small><br>`
+            : `${line} = <strong>${result}</strong><br>`;
           processed=true;
         }
       }
