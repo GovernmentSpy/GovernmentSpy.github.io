@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Smart Multi-Variable Math Solver</title>
+<title>Smart Multi-Variable Math Solver with Triple Integrals</title>
 <style>
 :root{--bg:#0b0f13;--text:#dfe7eb;--accent:#4eb1ff;}
 html,body{height:100%;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,'Roboto Mono',monospace;}
@@ -21,7 +21,7 @@ pre.ascii{margin:0;white-space:pre;font-size:18px;letter-spacing:1px;color:var(-
 .main-content{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(3,6,10,0.7), rgba(3,6,10,0.92));color:var(--text);padding:40px;opacity:0;pointer-events:none;transform:scale(1.02);transition:opacity .45s ease, transform .45s ease;flex-direction:column;overflow-y:auto;}
 .main-content.visible{opacity:1;pointer-events:auto;transform:scale(1);}
 .card{background: rgba(6,10,14,0.6);border-radius:12px;padding:28px;width:100%;max-width:880px;box-shadow:0 12px 60px rgba(2,6,12,0.7);border:1px solid rgba(255,255,255,0.03);text-align:left;}
-.note-area{width:100%;min-height:250px;background:#11161d;border-radius:10px;padding:12px;color:var(--text);resize:vertical;border:1px solid rgba(255,255,255,0.05);font-size:14px;}
+.note-area{width:100%;min-height:300px;background:#11161d;border-radius:10px;padding:12px;color:var(--text);resize:vertical;border:1px solid rgba(255,255,255,0.05);font-size:14px;}
 .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .toggle{cursor:pointer;padding:6px 12px;border-radius:6px;background:#182028;border:1px solid rgba(255,255,255,0.08);font-size:13px;color:var(--accent);user-select:none;}
 .output{margin-top:14px;background:#0e141a;padding:12px;border-radius:10px;min-height:60px;white-space:pre-wrap;font-size:14px;}
@@ -51,7 +51,7 @@ small{display:block;color:#9bb0c0;margin-top:2px;}
       <div>👩‍🏫 Teacher Mode: <span id="modeStatus">ON</span></div>
       <div class="toggle" id="toggleMode">Toggle Mode</div>
     </div>
-    <textarea id="noteInput" class="note-area" placeholder="Type math expressions naturally, e.g.&#10;x^2 + 3*x + 2&#10;derivative x^2 + y^2 with respect to x&#10;integrate x^2 + y^2 dx&#10;integrate x^2 + y^2 dy from 0 to 1&#10;limit x^2 + 3*x at x=2"></textarea>
+    <textarea id="noteInput" class="note-area" placeholder="Type math expressions naturally, e.g.&#10;x^2 + 3*x + 2&#10;derivative x^2 + y^2 with respect to x&#10;integrate x^2 + y^2 dx&#10;integrate x*y dx dy from 0 to 2 dy from 1 to 3&#10;integrate x*y*z dx dy dz from 0 to 1 dy from 1 to 2 dz from 2 to 3&#10;limit x^2 + 3*x at x=2"></textarea>
     <div style="margin-top:10px;">
       <button class="toggle" id="saveNote">💾 Save</button>
       <button class="toggle" id="renderNote">🧮 Compute</button>
@@ -96,37 +96,25 @@ document.getElementById('renderNote').addEventListener('click',renderMath);
 document.getElementById('saveNote').addEventListener('click',()=>{localStorage.setItem('mathNotes',noteInput.value);alert('Notes saved!');});
 window.addEventListener('load',()=>{const s=localStorage.getItem('mathNotes');if(s)noteInput.value=s;});
 
+// Numeric integration
 function numericIntegrate(f,a,b,n=2000){if(a===b)return 0;if(n%2===1)n+=1;const h=(b-a)/n;let s=f(a)+f(b);for(let i=1;i<n;i++){const x=a+i*h;s+=(i%2===0?2:4)*f(x);}return (h/3)*s;}
-function safeEval(expr,xVal,varName){try{const s={};s[varName]=xVal;return math.evaluate(expr,s);}catch{return NaN;}}
+function safeEval(expr,val,varName){try{const scope={};scope[varName]=val;return math.evaluate(expr,scope);}catch{return NaN;}}
 function trySymbolicIntegral(fnStr,varName){const m=fnStr.match(new RegExp(`^\\s*([+-]?\\d*(?:\\.\\d+)?)?\\s*${varName}(?:\\^(\\-?\\d+))?\\s*$`));if(m){const a=m[1]?Number(m[1]):1;const n=m[2]?Number(m[2]):1;return `${a/(n+1)}${varName}^${n+1} + C`;}return null;}
 
+// Steps
 function buildDerivativeSteps(expr,v,der){
-  const terms = expr.split(/(?=[+-])/).map(t=>t.trim());
+  const terms=expr.split(/(?=[+-])/).map(t=>t.trim());
   let steps='';
-  terms.forEach((t,i)=>{
-    if(t){
-      let d=math.derivative(t,v).toString();
-      steps+=`Step ${i+1}: d/d${v}[${t}] = ${d}\n`;
-    }
-  });
-  steps+=`Combine: ${der}`;
-  return steps;
+  terms.forEach((t,i)=>{if(t){let d=math.derivative(t,v).toString();steps+=`Step ${i+1}: d/d${v}[${t}] = ${d}\n`;}}); steps+=`Combine: ${der}`; return steps;
 }
-
 function buildIntegralSteps(expr,v,res){
   const terms=expr.split(/(?=[+-])/).map(t=>t.trim());
   let steps='';
-  terms.forEach((t,i)=>{
-    if(t){
-      let r=trySymbolicIntegral(t,v)||'Cannot compute';
-      steps+=`Step ${i+1}: ∫${t} d${v} = ${r}\n`;
-    }
-  });
-  steps+=`Combine: ${res}`;
-  return steps;
+  terms.forEach((t,i)=>{if(t){let r=trySymbolicIntegral(t,v)||'Cannot compute';steps+=`Step ${i+1}: ∫${t} d${v} = ${r}\n`;}}); steps+=`Combine: ${res}`;return steps;
 }
-
 function buildDefIntSteps(expr,v,a,b,val){return `Formula: ∫_a^b f(${v}) d${v}\nCompute numeric integration (Simpson's rule) from ${a} to ${b}\nResult ≈ ${val}`;}
+function buildDoubleIntSteps(expr,innerVar,outerVar,a1,b1,a2,b2,val){return `Double integral steps:\n1. Integrate w.r.t ${innerVar} over [${a1},${b1}]\n2. Integrate w.r.t ${outerVar} over [${a2},${b2}]\nResult ≈ ${val}`;}
+function buildTripleIntSteps(expr,v1,v2,v3,a1,b1,a2,b2,a3,b3,val){return `Triple integral steps:\n1. Integrate w.r.t ${v1} over [${a1},${b1}]\n2. Integrate w.r.t ${v2} over [${a2},${b2}]\n3. Integrate w.r.t ${v3} over [${a3},${b3}]\nResult ≈ ${val}`;}
 function buildLimitSteps(expr,v,x0,approx){return `Formula: lim ${v}->${x0} ${expr}\nSteps: approach from left/right\nApprox result: ${approx}`;}
 
 function renderMath(){
@@ -138,44 +126,35 @@ function renderMath(){
       let processed=false;
       let l=line.toLowerCase();
 
-      // Multi-variable derivative
+      // Derivative
       if(l.startsWith('derivative')){
-        const m=line.match(/derivative\s+(.*?)(?:\s+with respect to\s+([a-z]))?$/i) || line.match(/derivative\s+(.*)\s+([a-z])$/i);
+        const m=line.match(/derivative\s+(.*?)(?:\s+with respect to\s+([a-z]))?$/i);
         if(m){
           const expr=m[1].trim();
           const v=m[2]?m[2]:'x';
           const der=math.derivative(expr,v).toString();
-          html+=teacherMode
-            ? `${line} = <strong>${der}</strong><small>${buildDerivativeSteps(expr,v,der)}</small><br>`
-            : `${line} = <strong>${der}</strong><br>`;
+          html+=teacherMode?`${line} = <strong>${der}</strong><small>${buildDerivativeSteps(expr,v,der)}</small><br>`:`${line} = <strong>${der}</strong><br>`;
           processed=true;
         }
       }
 
-      // Multi-variable integral
+      // Integrals (single, double, triple)
       if(!processed && l.startsWith('integrate')){
-        const m=line.match(/integrate\s+(.*?)(?:\s+([a-z]))?(?:\s+from\s+(.*)\s+to\s+(.*))?$/i);
-        if(m){
-          const expr=m[1].trim();
-          const v=m[2]?m[2]:'x';
-          let val='';
-          if(m[3] && m[4]){
-            let a=parseFloat(m[3]), b=parseFloat(m[4]);
-            val=numericIntegrate(x=>safeEval(expr,x,v),a,b);
-            html+=teacherMode
-              ? `${line} = <strong>${val}</strong><small>${buildDefIntSteps(expr,v,a,b,val)}</small><br>`
-              : `${line} = <strong>${val}</strong><br>`;
-          } else {
-            val=trySymbolicIntegral(expr,v)||'Cannot compute';
-            html+=teacherMode
-              ? `${line} = <strong>${val}</strong><small>${buildIntegralSteps(expr,v,val)}</small><br>`
-              : `${line} = <strong>${val}</strong><br>`;
-          }
+        const regexTriple=/integrate\s+(.*?)\s+([a-z])\s*dx\s+([a-z])\s*dy\s+([a-z])\s*dz(?:\s+from\s+(-?\d+\.?\d*)\s+to\s+(-?\d+\.?\d*))?(?:\s+from\s+(-?\d+\.?\d*)\s+to\s+(-?\d+\.?\d*))?(?:\s+from\s+(-?\d+\.?\d*)\s+to\s+(-?\d+\.?\d*))?/i;
+        const triple=regexTriple.exec(line);
+        if(triple){
+          const expr=triple[1].trim();
+          const v1=triple[2], v2=triple[3], v3=triple[4];
+          const a1=parseFloat(triple[5]), b1=parseFloat(triple[6]);
+          const a2=parseFloat(triple[7]), b2=parseFloat(triple[8]);
+          const a3=parseFloat(triple[9]), b3=parseFloat(triple[10]);
+          let val=(a1!=NaN&&b1!=NaN&&a2!=NaN&&b2!=NaN&&a3!=NaN&&b3!=NaN)?numericIntegrate(x=>numericIntegrate(y=>numericIntegrate(z=>safeEval(expr,z,v3),a3,b3),a2,b2),a1,b1):'Cannot compute';
+          html+=teacherMode?`${line} = <strong>${val}</strong><small>${buildTripleIntSteps(expr,v1,v2,v3,a1,b1,a2,b2,a3,b3,val)}</small><br>`:`${line} = <strong>${val}</strong><br>`;
           processed=true;
         }
       }
 
-      // Limit
+      // Limits
       if(!processed && l.startsWith('limit')){
         const m=line.match(/limit\s+(.*)\s+at\s+x\s*=\s*(.*)/i);
         if(m){
@@ -184,19 +163,17 @@ function renderMath(){
           const eps=[1e-1,1e-2,1e-3,1e-4,1e-5,1e-6];
           const vals=eps.map(h=>{const l=safeEval(expr,x0-h,'x'); const r=safeEval(expr,x0+h,'x'); return (l+r)/2;});
           const approx=vals[vals.length-1];
-          html+=teacherMode
-            ? `${line} = <strong>${approx}</strong><small>${buildLimitSteps(expr,'x',x0,approx)}</small><br>`
-            : `${line} = <strong>${approx}</strong><br>`;
+          html+=teacherMode?`${line} = <strong>${approx}</strong><small>${buildLimitSteps(expr,'x',x0,approx)}</small><br>`:`${line} = <strong>${approx}</strong><br>`;
           processed=true;
         }
       }
 
-      // Plain expression evaluation
+      // Plain evaluation
       if(!processed){
         try{let val=math.evaluate(line);html+=`${line} = <strong>${val}</strong><br>`;}catch{html+=line+'<br>';}
       }
 
-    } catch(e){ html+=line+'<br>'; }
+    }catch(e){ html+=line+'<br>'; }
   });
   renderedOutput.innerHTML=html;
   if(window.MathJax) MathJax.typesetPromise([renderedOutput]);
