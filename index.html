@@ -59,65 +59,91 @@ small{display:block;color:#9bb0c0;margin-top:2px;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script>
-const entryBtn=document.getElementById('entryBtn');
-const asciiArt=document.getElementById('asciiArt');
-const entryContainer=document.getElementById('entryContainer');
-const mainContent=document.getElementById('mainContent');
-entryBtn.addEventListener('click',()=>{
+const entryBtn = document.getElementById('entryBtn');
+const asciiArt = document.getElementById('asciiArt');
+const entryContainer = document.getElementById('entryContainer');
+const mainContent = document.getElementById('mainContent');
+entryBtn.addEventListener('click', () => {
   asciiArt.classList.add('fire-glitch');
-  setTimeout(()=>{
+  setTimeout(() => {
     asciiArt.classList.remove('fire-glitch');
     entryContainer.classList.add('fade-out');
-    setTimeout(()=>{mainContent.classList.add('visible');entryContainer.style.display='none';},380);
-  },800);
+    setTimeout(() => { mainContent.classList.add('visible'); entryContainer.style.display = 'none'; }, 380);
+  }, 800);
 });
 
-const noteInput=document.getElementById('noteInput');
-const renderedOutput=document.getElementById('renderedOutput');
-const toggleMode=document.getElementById('toggleMode');
-const modeStatus=document.getElementById('modeStatus');
-let teacherMode=true;
-toggleMode.addEventListener('click',()=>{teacherMode=!teacherMode;modeStatus.textContent=teacherMode?'ON':'OFF';renderMath();});
-document.getElementById('renderNote').addEventListener('click',renderMath);
-document.getElementById('saveNote').addEventListener('click',()=>{localStorage.setItem('mathNotes',noteInput.value);alert('Notes saved!');});
-window.addEventListener('load',()=>{const s=localStorage.getItem('mathNotes');if(s)noteInput.value=s;});
+const noteInput = document.getElementById('noteInput');
+const renderedOutput = document.getElementById('renderedOutput');
+const toggleMode = document.getElementById('toggleMode');
+const modeStatus = document.getElementById('modeStatus');
+let teacherMode = true;
 
-function safeEval(expr,val,varName){try{const scope={};scope[varName]=val;return math.evaluate(expr,scope);}catch{return NaN;}}
+toggleMode.addEventListener('click', () => { teacherMode = !teacherMode; modeStatus.textContent = teacherMode ? 'ON' : 'OFF'; renderMath(); });
+document.getElementById('renderNote').addEventListener('click', renderMath);
+document.getElementById('saveNote').addEventListener('click', () => { localStorage.setItem('mathNotes', noteInput.value); alert('Notes saved!'); });
+window.addEventListener('load', () => { const saved = localStorage.getItem('mathNotes'); if (saved) noteInput.value = saved; });
 
-function parseExpression(line){
-  try{
-    let l=line.trim();
-    if(l.toLowerCase().startsWith('derivative')){
-      let m=l.match(/derivative\s+(.*?)(?:\s+with respect to\s+([a-z]))?$/i);
-      if(m)return {type:'derivative',expr:m[1].trim(),var:m[2]||'x'};
-    } else if(l.toLowerCase().startsWith('integrate')){
-      let vars=(l.match(/d([a-z])/gi)||[]).map(v=>v[1]);
-      let expr=l.replace(/integrate|d[a-z]/gi,'').trim();
-      return {type:'integrate',expr:expr,vars:vars};
-    } else if(l.toLowerCase().startsWith('limit')){
-      let m=l.match(/limit\s+(.*)\s+at\s+([a-z])\s*=\s*(.*)/i);
-      if(m)return {type:'limit',expr:m[1].trim(),var:m[2],point:parseFloat(m[3])};
+function parseExpression(line) {
+  let l = line.trim();
+  if (l.toLowerCase().startsWith('derivative')) {
+    let m = l.match(/derivative\s+(.*?)(?:\s+with respect to\s+([a-z]))?$/i);
+    if (m) return { type: 'derivative', expr: m[1].trim(), var: m[2] || 'x' };
+  } else if (l.toLowerCase().startsWith('integrate')) {
+    let vars = (l.match(/d([a-z])/gi) || []).map(v => v[1]);
+    let expr = l.replace(/integrate|d[a-z]/gi, '').trim();
+    return { type: 'integrate', expr: expr, vars: vars };
+  } else if (l.toLowerCase().startsWith('limit')) {
+    let m = l.match(/limit\s+(.*)\s+at\s+([a-z])\s*=\s*(.*)/i);
+    if (m) return { type: 'limit', expr: m[1].trim(), var: m[2], point: parseFloat(m[3]) };
+  }
+  return { type: 'eval', expr: l };
+}
+
+function derivativeSteps(expr, v) {
+  try { const d = math.derivative(expr, v).toString(); return `d/d${v}[${expr}] = ${d} (power/chain/product rules applied)`; } catch { return 'Cannot compute derivative.'; }
+}
+
+function integralSteps(expr, vars) {
+  let result = expr; let steps = '';
+  vars.forEach(v => {
+    try {
+      const integral = `∫${result} d${v}`;
+      steps += `Integrate w.r.t ${v}: ${integral}\n`;
+      result = integral;
+    } catch {
+      steps += `Cannot integrate w.r.t ${v}\n`;
     }
-    return {type:'eval',expr:l};
-  } catch { return {type:'eval',expr:line}; }
+  });
+  return { result, steps };
 }
 
-function derivativeSteps(expr,v){
-  let steps='';
-  try{
-    let d=math.derivative(expr,v).toString();
-    steps=`Using d/d${v}[expr]: ${d} (apply power/chain/product rules as needed)`;
-  } catch { steps='Could not compute derivative steps.';}
-  return steps;
-}
+function safeEval(expr, val, varName) { try { const scope = {}; scope[varName] = val; return math.evaluate(expr, scope); } catch { return NaN; } }
 
-function integralSteps(expr,vars){
-  let result=expr; let steps='';
-  try{
-    vars.forEach(v=>{steps+=`Integrate with respect to ${v} step: symbolic simplification applied\n`; result+=` (integrated w.r.t ${v})`;});
-  } catch { steps='Could not compute integral steps.';}
-  return {result,result,steps};
+function renderMath() {
+  let lines = noteInput.value.split(/\n+/);
+  let html = '';
+  lines.forEach(line => {
+    if (!line.trim()) { html += '<br>'; return; }
+    let parsed = parseExpression(line);
+    if (parsed.type === 'derivative') {
+      let d;
+      try { d = math.derivative(parsed.expr, parsed.var).toString(); } catch { d = 'Cannot compute'; }
+      html += line + ' = <strong>' + d + '</strong>' + (teacherMode ? `<small>${derivativeSteps(parsed.expr, parsed.var)}</small>` : '') + '<br>';
+    } else if (parsed.type === 'integrate') {
+      const res = integralSteps(parsed.expr, parsed.vars);
+      html += line + ' = <strong>' + res.result + '</strong>' + (teacherMode ? `<small>${res.steps}</small>` : '') + '<br>';
+    } else if (parsed.type === 'limit') {
+      let approx = safeEval(parsed.expr, parsed.point, parsed.var);
+      html += line + ' = <strong>' + approx + '</strong>' + (teacherMode ? `<small>Limit approximated</small>` : '') + '<br>';
+    } else {
+      let val;
+      try { val = math.evaluate(parsed.expr); } catch { val = 'Error'; }
+      html += line + ' = <strong>' + val + '</strong><br>';
+    }
+  });
+  renderedOutput.innerHTML = html;
+  if (window.MathJax) MathJax.typesetPromise([renderedOutput]);
 }
-
-function renderMath(){
-  let lines=noteInput.value.split(/\n+/);
+</script>
+</body>
+</html>
