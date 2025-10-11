@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Math 55B Full Solver</title>
+<title>Math Solver Thing</title>
 <style>
 :root{--bg:#0b0f13;--text:#dfe7eb;--accent:#4eb1ff;}
 html,body{height:100%;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,'Roboto Mono',monospace;}
@@ -31,13 +31,15 @@ small{display:block;color:#9bb0c0;margin-top:2px;}
 <div class="container" id="entryContainer">
   <button class="entry-button" id="entryBtn" aria-label="Enter site">
     <pre class="ascii" id="asciiArt">
-░▒▓██████▓▒░░▒▓█▓▒░ 
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
-░▒▓████████▓▒░▒▓█▓▒░ 
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░ 
+░▒▓██████████████▓▒░ ░▒▓███████▓▒░▒▓████████▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░     
+░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░     
+░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░   ░▒▓█▓▒░     
+░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░     
+░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░     
+░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░   ░▒▓█▓▒░     
+                                                
+                                                
     </pre>
   </button>
   <div class="hint">Click to Enter</div>
@@ -45,7 +47,7 @@ small{display:block;color:#9bb0c0;margin-top:2px;}
 <div class="main-content" id="mainContent">
   <div class="card">
     <div class="toolbar">
-      <div>👩‍🏫 Teacher Mode: <span id="modeStatus">ON</span></div>
+      <div>Teacher Mode: <span id="modeStatus">ON</span></div>
       <div class="toggle" id="toggleMode">Toggle Mode</div>
     </div>
     <textarea id="noteInput" class="note-area" placeholder="Type math expressions naturally, e.g.
@@ -54,8 +56,8 @@ integrate x*y dx dy
 limit x^2 + y^2 at x=1,y=2
 x^2 + 3*x + 2"></textarea>
     <div style="margin-top:10px;">
-      <button class="toggle" id="saveNote">💾 Save</button>
-      <button class="toggle" id="renderNote">🧮 Compute</button>
+      <button class="toggle" id="saveNote">Save</button>
+      <button class="toggle" id="renderNote">Answer</button>
     </div>
     <div class="output" id="renderedOutput"></div>
   </div>
