@@ -7,3 +7,5 @@
 **Non-compliance may be subject to the EU Digital Services Act (DSA) regulations.**
 
 **Email:** [j__@outlook.cz](mailto:j__@outlook.cz) 
+or
+**Email:** [u_u@outlook.cz](mailto:u_u@outlook.cz) 
