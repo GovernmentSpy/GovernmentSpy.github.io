@@ -118,7 +118,7 @@ class AIBot {
         }
 
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${sender}-message`;
+        messageDiv.className = 'message ' + sender + '-message';
 
         const avatar = document.createElement('div');
         avatar.className = 'message-avatar';
@@ -465,7 +465,7 @@ class AIBot {
 
     evaluateMathExpression(expression) {
         const cleanExpression = expression.replace(/[^0-9+\-*/().\s]/g, '');
-        return Function("use strict"; return (${cleanExpression})`)();
+        return Function('return (' + cleanExpression + ')')();
     }
 
     getCurrentTime() {
