@@ -13,7 +13,6 @@
         <div class="loading-content">
             <div class="ascii-art">
                 <pre>
-                                                                                                                            
 MMMMMMMM               MMMMMMMM   SSSSSSSSSSSSSSS TTTTTTTTTTTTTTTTTTTTTTT
 M:::::::M             M:::::::M SS:::::::::::::::ST:::::::::::::::::::::T
 M::::::::M           M::::::::MS:::::SSSSSS::::::ST:::::::::::::::::::::T
@@ -30,14 +29,12 @@ M::::::M               M::::::MSSSSSSS     S:::::S      TT:::::::TT
 M::::::M               M::::::MS::::::SSSSSS:::::S      T:::::::::T      
 M::::::M               M::::::MS:::::::::::::::SS       T:::::::::T      
 MMMMMMMM               MMMMMMMM SSSSSSSSSSSSSSS         TTTTTTTTTTT      
-                                                                        
                 </pre>
             </div>
             <div class="loading-text">Initializing MST Assistant...</div>
             <div class="loading-bar">
-                <div class="loading-progress"></div>
+                <div class="loading-progress" id="loadingProgress"></div>
             </div>
-            <button class="enter-button" id="enterButton">Enter Chat</button>
         </div>
     </div>
 
@@ -100,6 +97,25 @@ MMMMMMMM               MMMMMMMM SSSSSSSSSSSSSSS         TTTTTTTTTTT
         <span class="typing-text">MST AI is thinking...</span>
     </div>
 
-            <script src="script.js"></script>
+    <script>
+        // Simple simulated loading sequence
+        const loadingScreen = document.getElementById("loadingScreen");
+        const chatInterface = document.getElementById("chatInterface");
+        const progressBar = document.getElementById("loadingProgress");
+
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 2;
+            progressBar.style.width = progress + "%";
+
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    loadingScreen.style.display = "none";
+                    chatInterface.style.display = "block";
+                }, 500);
+            }
+        }, 60);
+    </script>
 </body>
 </html>
