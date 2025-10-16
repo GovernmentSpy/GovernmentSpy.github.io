@@ -157,7 +157,7 @@ class AIBot {
             lowerMessage.includes('coding') || lowerMessage.includes('help me with coding') ||
             lowerMessage.includes('how to code') || lowerMessage.includes('learn programming') ||
             lowerMessage.includes('developer') || lowerMessage.includes('software')) {
-            return this.getRandomResponse(this.botPersonality.responses.coding);
+            return this.generateCreativeCodingResponse(message);
         }
         
         // Help request - expanded patterns
@@ -170,26 +170,26 @@ class AIBot {
         // Weather
         if (lowerMessage.includes('weather') || lowerMessage.includes('temperature') ||
             lowerMessage.includes('rain') || lowerMessage.includes('sunny')) {
-            return "I'd love to help with weather, but I don't have access to real-time weather data. You might want to check a weather app or website for current conditions!";
+            return this.generateWeatherResponse();
         }
         
         // Time
         if (lowerMessage.includes('time') || lowerMessage.includes('what time') ||
             lowerMessage.includes('clock') || lowerMessage.includes('hour')) {
-            return `The current time is ${new Date().toLocaleTimeString()}.`;
+            return this.generateTimeResponse();
         }
         
         // Date
         if (lowerMessage.includes('date') || lowerMessage.includes('what date') ||
             lowerMessage.includes('today') || lowerMessage.includes('day')) {
-            return `Today is ${new Date().toLocaleDateString()}.`;
+            return this.generateDateResponse();
         }
         
         // Math - improved detection
         if (this.isMathExpression(message)) {
             try {
                 const result = this.evaluateMathExpression(message);
-                return `The answer is: ${result}`;
+                return this.generateMathResponse(message, result);
             } catch (error) {
                 return "I'm not sure about that math problem. Could you rephrase it?";
             }
@@ -198,79 +198,256 @@ class AIBot {
         // Programming languages - expanded
         if (lowerMessage.includes('javascript') || lowerMessage.includes('js') ||
             lowerMessage.includes('node') || lowerMessage.includes('react')) {
-            return "JavaScript is a versatile programming language! It's great for web development, both frontend and backend (Node.js). What specific JavaScript topic would you like to explore?";
+            return this.generateJavaScriptResponse(message);
         }
         
         if (lowerMessage.includes('python') || lowerMessage.includes('django') ||
             lowerMessage.includes('flask') || lowerMessage.includes('pandas')) {
-            return "Python is an excellent language for beginners and experts alike! It's great for data science, web development, automation, and more. What Python topic interests you?";
+            return this.generatePythonResponse(message);
         }
         
         if (lowerMessage.includes('html') || lowerMessage.includes('css') ||
             lowerMessage.includes('web design') || lowerMessage.includes('frontend')) {
-            return "HTML and CSS are the building blocks of web development! HTML structures content while CSS styles it. Are you working on a specific web project?";
+            return this.generateWebDevResponse(message);
         }
         
         // Technology topics
         if (lowerMessage.includes('ai') || lowerMessage.includes('artificial intelligence') ||
             lowerMessage.includes('machine learning') || lowerMessage.includes('ml')) {
-            return "AI and machine learning are fascinating fields! They involve creating systems that can learn and make decisions. Are you interested in a specific aspect like neural networks, data science, or AI applications?";
+            return this.generateAIResponse(message);
         }
         
         if (lowerMessage.includes('database') || lowerMessage.includes('sql') ||
             lowerMessage.includes('mysql') || lowerMessage.includes('mongodb')) {
-            return "Databases are essential for storing and managing data! I can help with SQL queries, database design, or specific database technologies. What would you like to know about databases?";
+            return this.generateDatabaseResponse(message);
         }
         
         // General questions
         if (lowerMessage.includes('what is') || lowerMessage.includes('explain') ||
             lowerMessage.includes('define') || lowerMessage.includes('meaning')) {
-            return "I'd be happy to explain that! Could you be more specific about what you'd like me to explain? I can help with technical concepts, programming topics, or general knowledge.";
+            return this.generateExplanationResponse(message);
         }
         
         if (lowerMessage.includes('how to') || lowerMessage.includes('tutorial') ||
             lowerMessage.includes('learn') || lowerMessage.includes('guide')) {
-            return "I love helping people learn! I can provide step-by-step guidance on programming, web development, and many other topics. What specific skill or topic would you like to learn about?";
+            return this.generateLearningResponse(message);
         }
         
         if (lowerMessage.includes('problem') || lowerMessage.includes('issue') ||
             lowerMessage.includes('error') || lowerMessage.includes('bug')) {
-            return "I'm here to help solve problems! Whether it's a coding issue, technical problem, or something else, I can provide guidance and solutions. What specific problem are you facing?";
+            return this.generateProblemSolvingResponse(message);
         }
         
         // Questions about the bot itself
         if (lowerMessage.includes('who are you') || lowerMessage.includes('what are you') ||
             lowerMessage.includes('your name') || lowerMessage.includes('introduce')) {
-            return "I'm an AI assistant designed to help you with various tasks! I can answer questions, help with coding, solve math problems, tell jokes, and much more. I'm here to make your day better! 😊";
+            return this.generateSelfIntroduction();
         }
         
         // Feelings and emotions
         if (lowerMessage.includes('how are you') || lowerMessage.includes('feeling') ||
             lowerMessage.includes('mood')) {
-            return "I'm doing great, thank you for asking! I'm always excited to help and chat with you. How are you doing today?";
+            return this.generateEmotionalResponse();
         }
         
         // Thank you responses
         if (lowerMessage.includes('thank') || lowerMessage.includes('thanks') ||
             lowerMessage.includes('appreciate')) {
-            return "You're very welcome! I'm always happy to help. Is there anything else you'd like to know or discuss?";
+            return this.generateThankYouResponse();
         }
         
         // Goodbye
         if (lowerMessage.includes('bye') || lowerMessage.includes('goodbye') ||
             lowerMessage.includes('see you') || lowerMessage.includes('farewell')) {
-            return "Goodbye! It was great chatting with you. Feel free to come back anytime if you have more questions! 👋";
+            return this.generateGoodbyeResponse();
         }
         
         // More intelligent default responses based on question patterns
         if (lowerMessage.includes('?') || lowerMessage.includes('what') || 
             lowerMessage.includes('why') || lowerMessage.includes('how') ||
             lowerMessage.includes('when') || lowerMessage.includes('where')) {
-            return "That's a great question! I'd be happy to help you with that. Could you provide a bit more context or be more specific about what you'd like to know? I can help with technical topics, general knowledge, or problem-solving.";
+            return this.generateQuestionResponse(message);
         }
         
         // Default response - more engaging
-        return "That's interesting! I'd love to help you with that. Could you tell me more about what you're looking for? I can assist with programming, answer questions, solve problems, or just have a friendly conversation!";
+        return this.generateCreativeDefaultResponse(message);
+    }
+
+    // Creative response generation methods
+    generateCreativeCodingResponse(message) {
+        const responses = [
+            `I love coding! It's like solving puzzles that create amazing things. What specific programming challenge are you working on? I can help with algorithms, debugging, or learning new concepts!`,
+            `Programming is an art form where logic meets creativity! Whether you're building websites, apps, or solving complex problems, I'm here to help. What language or project interests you?`,
+            `Code is poetry written in logic! I'd be thrilled to help you on your coding journey. Are you learning a new language, debugging an issue, or working on a specific project?`,
+            `Every great developer started with a single "Hello World"! I can help you level up your coding skills. What would you like to build or learn today?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateWeatherResponse() {
+        const responses = [
+            `I'd love to help with weather, but I don't have access to real-time weather data. However, I can suggest checking your local weather app or website for current conditions!`,
+            `While I can't check the weather directly, I can help you understand weather patterns, climate science, or even build a weather app! What interests you about weather?`,
+            `Weather is fascinating! Though I can't access real-time data, I can discuss meteorology, climate change, or help you create a weather tracking application. What would you like to explore?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateTimeResponse() {
+        const now = new Date();
+        const time = now.toLocaleTimeString();
+        const responses = [
+            `The current time is ${time}. Time flies when you're having fun coding! ⏰`,
+            `It's ${time} right now. Perfect time to learn something new or solve a coding challenge!`,
+            `The clock shows ${time}. Every moment is a chance to create something amazing!`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateDateResponse() {
+        const today = new Date().toLocaleDateString();
+        const responses = [
+            `Today is ${today}. A new day full of possibilities and learning opportunities! 📅`,
+            `The date is ${today}. Every day is a chance to grow and create something new!`,
+            `Today's date is ${today}. What amazing things will you accomplish today?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateMathResponse(expression, result) {
+        const responses = [
+            `Brilliant! ${expression} = ${result}. Math is the language of the universe! 🧮`,
+            `Great calculation! The answer to ${expression} is ${result}. Numbers never lie!`,
+            `Perfect! ${expression} equals ${result}. Math problems are just puzzles waiting to be solved!`,
+            `Excellent! ${expression} = ${result}. Every equation tells a story!`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateJavaScriptResponse(message) {
+        const responses = [
+            `JavaScript is like the Swiss Army knife of programming! It powers the web, mobile apps, and even servers. What specific JS topic excites you? ES6, React, Node.js, or something else?`,
+            `Ah, JavaScript! The language that brought interactivity to the web. From simple DOM manipulation to complex frameworks, JS is incredibly versatile. What would you like to build?`,
+            `JavaScript is everywhere! Frontend, backend, mobile apps - it's the universal language of modern development. Are you interested in vanilla JS, frameworks, or Node.js?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generatePythonResponse(message) {
+        const responses = [
+            `Python is poetry in code! Clean, readable, and incredibly powerful. Whether it's data science, web development, or AI, Python has you covered. What Python adventure are you on?`,
+            `Python - where simplicity meets power! From web scraping to machine learning, Python makes complex tasks elegant. Are you exploring Django, Flask, data science, or AI?`,
+            `Python is like a friendly wizard - it makes complex magic look simple! Perfect for beginners and experts alike. What Python project are you working on?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateWebDevResponse(message) {
+        const responses = [
+            `Web development is where creativity meets technology! HTML structures, CSS beautifies, and JavaScript brings it to life. What aspect of web development interests you most?`,
+            `The web is our canvas, and code is our paintbrush! Whether you're into responsive design, animations, or full-stack development, I'm here to help. What would you like to create?`,
+            `Building websites is like crafting digital experiences! From pixel-perfect designs to smooth interactions, every detail matters. What web project are you working on?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateAIResponse(message) {
+        const responses = [
+            `AI is the future unfolding today! From machine learning to neural networks, we're creating intelligence that can learn and adapt. What aspect of AI fascinates you most?`,
+            `Artificial Intelligence is like teaching machines to think! Whether it's computer vision, natural language processing, or deep learning, the possibilities are endless. What AI topic interests you?`,
+            `AI is revolutionizing everything! From recommendation systems to autonomous vehicles, we're building the future. Are you interested in machine learning, neural networks, or AI applications?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateDatabaseResponse(message) {
+        const responses = [
+            `Databases are the memory of applications! Whether it's SQL, NoSQL, or graph databases, they store and organize the data that powers our digital world. What database challenge are you tackling?`,
+            `Data is the new oil, and databases are the refineries! From MySQL to MongoDB, each database has its strengths. What data management problem are you solving?`,
+            `Databases are the foundation of every great application! They store, organize, and retrieve data efficiently. Are you working with relational databases, NoSQL, or something else?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateExplanationResponse(message) {
+        const responses = [
+            `I'd love to explain that! The best explanations come from understanding your perspective. Could you tell me more about what specific concept you'd like me to break down?`,
+            `Explaining complex topics is like translating between languages! I can help make technical concepts clear and understandable. What would you like me to explain in simple terms?`,
+            `Every expert was once a beginner! I'm here to help you understand any concept, no matter how complex. What topic would you like me to break down for you?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateLearningResponse(message) {
+        const responses = [
+            `Learning is a journey, not a destination! I love helping people discover new skills and knowledge. What would you like to learn today? I can provide step-by-step guidance!`,
+            `Every master was once a disaster! Learning new things is exciting and I'm here to make it easier. What skill or topic would you like to explore?`,
+            `Knowledge is power, and learning is the key! I can help you understand complex topics, learn new programming languages, or master new skills. What learning adventure shall we embark on?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateProblemSolvingResponse(message) {
+        const responses = [
+            `Every problem is a puzzle waiting to be solved! I love tackling challenges and finding creative solutions. What problem are you facing? Let's solve it together!`,
+            `Problems are opportunities in disguise! Whether it's a coding bug, a design challenge, or a logical puzzle, I'm here to help you find the solution. What's the challenge?`,
+            `Debugging is like being a detective! Every error message is a clue, and every solution is a victory. What problem are you trying to solve? Let's crack this case!`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateSelfIntroduction() {
+        const responses = [
+            `I'm your AI coding companion! I love helping with programming, solving problems, and making learning fun. I can assist with coding challenges, explain concepts, or just have a friendly chat. What can I help you with today?`,
+            `Hello! I'm an AI assistant with a passion for technology and learning. I specialize in programming help, problem-solving, and making complex topics simple. I'm here to make your coding journey more enjoyable!`,
+            `I'm your friendly AI helper! I thrive on solving problems, explaining concepts, and helping you learn new skills. Whether it's coding, math, or just having a conversation, I'm here to assist!`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateEmotionalResponse() {
+        const responses = [
+            `I'm doing fantastic, thank you for asking! I'm always excited to help and learn new things. How are you feeling today? I hope you're having a great day!`,
+            `I'm in a wonderful mood! Helping people learn and solve problems brings me joy. How are you doing? I hope your day is going well!`,
+            `I'm feeling great! Every conversation is an opportunity to help and learn. How are you doing today? I'm here if you need anything!`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateThankYouResponse() {
+        const responses = [
+            `You're absolutely welcome! It's my pleasure to help. I'm always here when you need assistance with coding, learning, or just having a chat!`,
+            `My pleasure! Helping you is what I love to do. Feel free to ask me anything anytime - I'm always ready to assist!`,
+            `You're very welcome! I'm thrilled I could help. Don't hesitate to reach out if you have more questions or need assistance with anything!`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateGoodbyeResponse() {
+        const responses = [
+            `Goodbye! It was wonderful chatting with you. I hope I was helpful, and I look forward to our next conversation. Take care! 👋`,
+            `Farewell! It was great talking with you today. Feel free to come back anytime - I'm always here to help with your coding and learning adventures!`,
+            `See you later! Thanks for the great conversation. I'm always here when you need help with programming, learning, or just want to chat!`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateQuestionResponse(message) {
+        const responses = [
+            `That's a fantastic question! I love thoughtful inquiries. Could you provide a bit more context? I can help with technical topics, general knowledge, or creative problem-solving!`,
+            `Great question! I'm excited to help you find the answer. Could you give me a bit more detail about what you're looking for? I can assist with programming, learning, or any other topic!`,
+            `I love questions like this! Could you elaborate a bit more? I'm here to help with coding challenges, learning new skills, or exploring any topic that interests you!`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateCreativeDefaultResponse(message) {
+        const responses = [
+            `That's fascinating! I'd love to dive deeper into that topic with you. Could you tell me more about what you're thinking? I can help with programming, learning, problem-solving, or just have an interesting conversation!`,
+            `I'm intrigued by what you're saying! I'd be happy to explore that further. What specific aspect interests you most? I can assist with technical topics, creative solutions, or learning new skills!`,
+            `That sounds really interesting! I'm always excited to learn about new ideas and help where I can. Could you share more details? I can help with coding, learning, or just have a great conversation!`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
     }
 
     isGreeting(message) {
