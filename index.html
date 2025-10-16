@@ -11,7 +11,7 @@
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-content">
-            <div class="ascii-art">
+            <div class="ascii-art" id="asciiArt">
                 <pre>
 MMMMMMMM               MMMMMMMM   SSSSSSSSSSSSSSS TTTTTTTTTTTTTTTTTTTTTTT
 M:::::::M             M:::::::M SS:::::::::::::::ST:::::::::::::::::::::T
@@ -39,7 +39,7 @@ MMMMMMMM               MMMMMMMM SSSSSSSSSSSSSSS         TTTTTTTTTTT
     </div>
 
     <!-- Main Chat Interface -->
-    <div class="chat-interface" id="chatInterface" style="display: none;">
+    <div class="chat-interface" id="chatInterface">
         <div class="chat-header">
             <div class="header-left">
                 <div class="ai-avatar">
@@ -98,22 +98,32 @@ MMMMMMMM               MMMMMMMM SSSSSSSSSSSSSSS         TTTTTTTTTTT
     </div>
 
     <script>
-        // Simple simulated loading sequence
         const loadingScreen = document.getElementById("loadingScreen");
         const chatInterface = document.getElementById("chatInterface");
         const progressBar = document.getElementById("loadingProgress");
+        const asciiArt = document.getElementById("asciiArt");
 
         let progress = 0;
+
+        // ASCII pulse effect
+        setInterval(() => {
+            asciiArt.style.textShadow = `0 0 ${Math.random() * 20 + 10}px #00ff88, 0 0 ${Math.random() * 30 + 10}px #00cc6a`;
+        }, 500);
+
         const interval = setInterval(() => {
             progress += 2;
             progressBar.style.width = progress + "%";
 
             if (progress >= 100) {
                 clearInterval(interval);
+                // Fade out loading
+                loadingScreen.style.opacity = 0;
+                // Fade in chat
+                chatInterface.style.display = "flex";
                 setTimeout(() => {
+                    chatInterface.style.opacity = 1;
                     loadingScreen.style.display = "none";
-                    chatInterface.style.display = "block";
-                }, 500);
+                }, 50);
             }
         }, 60);
     </script>
