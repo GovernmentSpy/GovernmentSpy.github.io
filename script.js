@@ -16,49 +16,95 @@ class AIBot {
         this.responseCount = 0;
         this.mathNotes = [];
         
+        console.log('AI Bot initialized');
+        console.log('Loading screen:', this.loadingScreen);
+        console.log('Chat interface:', this.chatInterface);
+        console.log('Enter button:', this.enterButton);
+        
         this.initializeEventListeners();
         this.initializeLoadingScreen();
     }
 
     initializeEventListeners() {
         // Loading screen
-        this.enterButton.addEventListener('click', () => this.enterChat());
+        if (this.enterButton) {
+            this.enterButton.addEventListener('click', () => this.enterChat());
+        } else {
+            console.error('Enter button not found!');
+        }
         
         // Chat functionality
-        this.sendButton.addEventListener('click', () => this.sendMessage());
-        this.messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                this.sendMessage();
-            }
-        });
+        if (this.sendButton) {
+            this.sendButton.addEventListener('click', () => this.sendMessage());
+        }
+        if (this.messageInput) {
+            this.messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.sendMessage();
+                }
+            });
+        }
         
         // Image upload
-        this.imageButton.addEventListener('click', () => {
-            this.imageUpload.click();
-        });
-        
-        this.imageUpload.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) {
-                this.handleImageUpload(e.target.files[0]);
-            }
-        });
+        if (this.imageButton && this.imageUpload) {
+            this.imageButton.addEventListener('click', () => {
+                this.imageUpload.click();
+            });
+            
+            this.imageUpload.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    this.handleImageUpload(e.target.files[0]);
+                }
+            });
+        }
     }
 
     initializeLoadingScreen() {
         // Simulate loading progress
         setTimeout(() => {
-            this.enterButton.style.display = 'block';
-            this.enterButton.style.opacity = '1';
+            if (this.enterButton) {
+                this.enterButton.style.display = 'block';
+                setTimeout(() => {
+                    this.enterButton.style.opacity = '1';
+                }, 100);
+            } else {
+                console.error('Enter button not found for loading screen!');
+                // Fallback: show chat interface after 3 seconds
+                setTimeout(() => {
+                    this.enterChat();
+                }, 1000);
+            }
         }, 3000);
     }
 
     enterChat() {
-        this.loadingScreen.style.opacity = '0';
+        console.log('Entering chat...');
+        
+        if (this.loadingScreen) {
+            this.loadingScreen.style.opacity = '0';
+            this.loadingScreen.style.transition = 'opacity 0.5s ease-out';
+        }
+        
         setTimeout(() => {
-            this.loadingScreen.style.display = 'none';
-            this.chatInterface.style.display = 'flex';
-            this.messageInput.focus();
+            if (this.loadingScreen) {
+                this.loadingScreen.style.display = 'none';
+            }
+            
+            if (this.chatInterface) {
+                this.chatInterface.style.display = 'flex';
+                this.chatInterface.style.opacity = '0';
+                this.chatInterface.style.transition = 'opacity 0.5s ease-in';
+                
+                setTimeout(() => {
+                    this.chatInterface.style.opacity = '1';
+                    if (this.messageInput) {
+                        this.messageInput.focus();
+                    }
+                }, 50);
+            } else {
+                console.error('Chat interface not found!');
+            }
         }, 500);
     }
 
