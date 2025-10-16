@@ -41,6 +41,10 @@
             <div class="chat-input-container">
                 <div class="input-wrapper">
                     <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                    <button id="imageButton" class="image-button" title="Upload math equation image">
+                        <i class="fas fa-camera"></i>
+                    </button>
                     <button id="sendButton" class="send-button">
                         <i class="fas fa-paper-plane"></i>
                     </button>
@@ -57,6 +61,10 @@
                     <button class="quick-action" data-message="Help me with coding">
                         <i class="fas fa-code"></i>
                         Coding help
+                    </button>
+                    <button class="quick-action" data-message="Upload math equation">
+                        <i class="fas fa-calculator"></i>
+                        Math equation
                     </button>
                 </div>
             </div>
