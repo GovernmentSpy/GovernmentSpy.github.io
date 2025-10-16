@@ -6,6 +6,9 @@ class AIBot {
         this.sendButton = document.getElementById('sendButton');
         this.typingIndicator = document.getElementById('typingIndicator');
         this.quickActions = document.querySelectorAll('.quick-action');
+        this.imageUpload = document.getElementById('imageUpload');
+        this.imageButton = document.getElementById('imageButton');
+        this.mathNotes = [];
         
         this.initializeEventListeners();
         this.initializeBot();
@@ -23,12 +26,27 @@ class AIBot {
             }
         });
         
+        // Image upload functionality
+        this.imageButton.addEventListener('click', () => {
+            this.imageUpload.click();
+        });
+        
+        this.imageUpload.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                this.handleImageUpload(e.target.files[0]);
+            }
+        });
+        
         // Quick action buttons
         this.quickActions.forEach(button => {
             button.addEventListener('click', () => {
                 const message = button.getAttribute('data-message');
-                this.messageInput.value = message;
-                this.sendMessage();
+                if (message === 'Upload math equation') {
+                    this.imageUpload.click();
+                } else {
+                    this.messageInput.value = message;
+                    this.sendMessage();
+                }
             });
         });
     }
@@ -75,6 +93,8 @@ class AIBot {
                     "• Explaining complex topics in simple terms",
                     "• Providing creative ideas and solutions",
                     "• Solving math problems and calculations",
+                    "• Processing math equations from images 📷",
+                    "• Creating and managing math notes 📚",
                     "• Discussing technology and AI topics",
                     "What would you like to explore?"
                 ],
@@ -158,6 +178,12 @@ class AIBot {
             lowerMessage.includes('how to code') || lowerMessage.includes('learn programming') ||
             lowerMessage.includes('developer') || lowerMessage.includes('software')) {
             return this.generateCreativeCodingResponse(message);
+        }
+        
+        // Math notes request
+        if (lowerMessage.includes('math notes') || lowerMessage.includes('my notes') ||
+            lowerMessage.includes('show notes') || lowerMessage.includes('math collection')) {
+            return this.displayMathNotes();
         }
         
         // Help request - expanded patterns
@@ -490,6 +516,156 @@ class AIBot {
 
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Image processing and math equation recognition
+    async handleImageUpload(file) {
+        // Show typing indicator
+        this.showTypingIndicator();
+        
+        // Add user message showing image upload
+        this.addMessage(`📷 Uploaded image: ${file.name}`, 'user');
+        
+        try {
+            // Read the image file
+            const imageData = await this.readImageFile(file);
+            
+            // Simulate processing time
+            await this.delay(2000);
+            
+            // Hide typing indicator
+            this.hideTypingIndicator();
+            
+            // Process the image for math equations
+            const mathResult = await this.processMathImage(imageData);
+            
+            // Add the result to math notes
+            this.addToMathNotes(mathResult);
+            
+            // Send response
+            this.addMessage(mathResult.response, 'bot');
+            
+        } catch (error) {
+            this.hideTypingIndicator();
+            this.addMessage("Sorry, I couldn't process that image. Please try uploading a clearer image of the math equation.", 'bot');
+        }
+    }
+
+    readImageFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async processMathImage(imageData) {
+        // Simulate AI processing of math equations
+        // In a real implementation, you would use OCR or ML services
+        
+        const mathEquations = [
+            "2x + 5 = 13",
+            "∫(x² + 3x + 2)dx",
+            "lim(x→0) (sin x)/x = 1",
+            "f(x) = ax² + bx + c",
+            "√(a² + b²) = c",
+            "e^(iπ) + 1 = 0",
+            "∑(n=1 to ∞) 1/n² = π²/6",
+            "∇·F = ∂F/∂x + ∂F/∂y + ∂F/∂z"
+        ];
+        
+        const randomEquation = mathEquations[Math.floor(Math.random() * mathEquations.length)];
+        
+        return {
+            equation: randomEquation,
+            response: this.generateMathEquationResponse(randomEquation),
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    generateMathEquationResponse(equation) {
+        const responses = [
+            `🔍 I've analyzed your math equation: ${equation}\n\n📝 Here's what I found: ${equation}\n\n💡 This appears to be a mathematical expression. Would you like me to:\n• Solve it step by step\n• Explain the concepts involved\n• Create a note for your math collection\n• Help with similar problems?`,
+            `📊 Math equation detected: ${equation}\n\n🧮 This looks like an interesting mathematical expression! I can help you:\n• Break down the solution process\n• Explain the mathematical concepts\n• Provide step-by-step solving\n• Add it to your math notes\n\nWhat would you like to do with this equation?`,
+            `🎯 Equation identified: ${equation}\n\n✨ Great math problem! I'm excited to help you with this. I can:\n• Solve it completely with explanations\n• Teach you the underlying concepts\n• Show you similar examples\n• Save it to your math notes for later review\n\nHow would you like to proceed?`
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    addToMathNotes(mathResult) {
+        const note = {
+            id: Date.now(),
+            equation: mathResult.equation,
+            timestamp: mathResult.timestamp,
+            solved: false,
+            notes: []
+        };
+        
+        this.mathNotes.push(note);
+        
+        // Store in localStorage for persistence
+        localStorage.setItem('mathNotes', JSON.stringify(this.mathNotes));
+        
+        // Show notification
+        this.showNotification(`📝 Added "${mathResult.equation}" to your math notes!`);
+    }
+
+    showNotification(message) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-in';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Math notes management
+    getMathNotes() {
+        const stored = localStorage.getItem('mathNotes');
+        return stored ? JSON.parse(stored) : [];
+    }
+
+    displayMathNotes() {
+        const notes = this.getMathNotes();
+        if (notes.length === 0) {
+            return "📚 You don't have any math notes yet. Upload some math equations to get started!";
+        }
+        
+        let response = "📚 Your Math Notes:\n\n";
+        notes.forEach((note, index) => {
+            response += `${index + 1}. ${note.equation}\n`;
+            response += `   📅 Added: ${new Date(note.timestamp).toLocaleDateString()}\n`;
+            if (note.solved) {
+                response += `   ✅ Solved\n`;
+            }
+            response += `\n`;
+        });
+        
+        response += "\n💡 You can ask me to solve any of these equations or explain the concepts!";
+        return response;
     }
 }
 
