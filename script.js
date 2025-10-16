@@ -9,6 +9,9 @@ class AIBot {
         this.imageUpload = document.getElementById('imageUpload');
         this.imageButton = document.getElementById('imageButton');
         this.mathNotes = [];
+        this.conversationHistory = [];
+        this.userPersonality = {};
+        this.responseCount = 0;
         
         this.initializeEventListeners();
         this.initializeBot();
@@ -160,143 +163,399 @@ class AIBot {
     }
 
     generateResponse(message) {
+        // Add to conversation history
+        this.conversationHistory.push({
+            type: 'user',
+            message: message,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Analyze user personality and context
+        this.analyzeUserPersonality(message);
+        
+        // Generate dynamic response based on context
+        const response = this.generateDynamicResponse(message);
+        
+        // Add bot response to history
+        this.conversationHistory.push({
+            type: 'bot',
+            message: response,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Keep only last 20 messages for context
+        if (this.conversationHistory.length > 20) {
+            this.conversationHistory = this.conversationHistory.slice(-20);
+        }
+        
+        this.responseCount++;
+        return response;
+    }
+
+    // Dynamic response generation system
+    analyzeUserPersonality(message) {
         const lowerMessage = message.toLowerCase();
         
-        // Greeting detection
-        if (this.isGreeting(lowerMessage)) {
-            return this.getRandomResponse(this.botPersonality.responses.greeting);
+        // Analyze communication style
+        if (lowerMessage.includes('!')) {
+            this.userPersonality.enthusiastic = (this.userPersonality.enthusiastic || 0) + 1;
+        }
+        if (lowerMessage.includes('?')) {
+            this.userPersonality.curious = (this.userPersonality.curious || 0) + 1;
+        }
+        if (lowerMessage.length > 100) {
+            this.userPersonality.detailed = (this.userPersonality.detailed || 0) + 1;
+        }
+        if (lowerMessage.includes('please') || lowerMessage.includes('thank')) {
+            this.userPersonality.polite = (this.userPersonality.polite || 0) + 1;
+        }
+        if (lowerMessage.includes('urgent') || lowerMessage.includes('asap') || lowerMessage.includes('quickly')) {
+            this.userPersonality.urgent = (this.userPersonality.urgent || 0) + 1;
         }
         
-        // Joke request
-        if (lowerMessage.includes('joke') || lowerMessage.includes('funny') || lowerMessage.includes('laugh')) {
-            return this.getRandomResponse(this.botPersonality.responses.joke);
+        // Analyze interests
+        if (lowerMessage.includes('code') || lowerMessage.includes('programming')) {
+            this.userPersonality.interests = this.userPersonality.interests || [];
+            if (!this.userPersonality.interests.includes('programming')) {
+                this.userPersonality.interests.push('programming');
+            }
         }
-        
-        // Coding help - expanded patterns
-        if (lowerMessage.includes('code') || lowerMessage.includes('programming') || 
-            lowerMessage.includes('coding') || lowerMessage.includes('help me with coding') ||
-            lowerMessage.includes('how to code') || lowerMessage.includes('learn programming') ||
-            lowerMessage.includes('developer') || lowerMessage.includes('software')) {
-            return this.generateCreativeCodingResponse(message);
+        if (lowerMessage.includes('math') || lowerMessage.includes('equation')) {
+            this.userPersonality.interests = this.userPersonality.interests || [];
+            if (!this.userPersonality.interests.includes('mathematics')) {
+                this.userPersonality.interests.push('mathematics');
+            }
         }
+    }
+
+    generateDynamicResponse(message) {
+        const lowerMessage = message.toLowerCase();
+        const context = this.getConversationContext();
+        const timeOfDay = this.getTimeOfDay();
+        const userMood = this.detectUserMood(message);
         
-        // Math notes request
-        if (lowerMessage.includes('math notes') || lowerMessage.includes('my notes') ||
-            lowerMessage.includes('show notes') || lowerMessage.includes('math collection')) {
+        // Special cases that need specific handling
+        if (lowerMessage.includes('math notes') || lowerMessage.includes('my notes')) {
             return this.displayMathNotes();
         }
         
-        // Help request - expanded patterns
-        if (lowerMessage.includes('help') || lowerMessage.includes('what can you') ||
-            lowerMessage.includes('what do you do') || lowerMessage.includes('capabilities') ||
-            lowerMessage.includes('assist') || lowerMessage.includes('support')) {
-            return this.botPersonality.responses.help.join('\n');
-        }
-        
-        // Weather
-        if (lowerMessage.includes('weather') || lowerMessage.includes('temperature') ||
-            lowerMessage.includes('rain') || lowerMessage.includes('sunny')) {
-            return this.generateWeatherResponse();
-        }
-        
-        // Time
-        if (lowerMessage.includes('time') || lowerMessage.includes('what time') ||
-            lowerMessage.includes('clock') || lowerMessage.includes('hour')) {
-            return this.generateTimeResponse();
-        }
-        
-        // Date
-        if (lowerMessage.includes('date') || lowerMessage.includes('what date') ||
-            lowerMessage.includes('today') || lowerMessage.includes('day')) {
-            return this.generateDateResponse();
-        }
-        
-        // Math - improved detection
         if (this.isMathExpression(message)) {
             try {
                 const result = this.evaluateMathExpression(message);
-                return this.generateMathResponse(message, result);
+                return this.generateDynamicMathResponse(message, result, context);
             } catch (error) {
-                return "I'm not sure about that math problem. Could you rephrase it?";
+                return this.generateDynamicErrorResponse(message, context);
             }
         }
         
-        // Programming languages - expanded
-        if (lowerMessage.includes('javascript') || lowerMessage.includes('js') ||
-            lowerMessage.includes('node') || lowerMessage.includes('react')) {
-            return this.generateJavaScriptResponse(message);
+        // Generate contextual response
+        return this.generateContextualResponse(message, context, timeOfDay, userMood);
+    }
+
+    getConversationContext() {
+        const recentMessages = this.conversationHistory.slice(-6);
+        const topics = [];
+        const userQuestions = [];
+        
+        recentMessages.forEach(msg => {
+            if (msg.type === 'user') {
+                const lowerMsg = msg.message.toLowerCase();
+                if (lowerMsg.includes('?')) {
+                    userQuestions.push(msg.message);
+                }
+                if (lowerMsg.includes('code') || lowerMsg.includes('programming')) {
+                    topics.push('programming');
+                }
+                if (lowerMsg.includes('math') || lowerMsg.includes('equation')) {
+                    topics.push('mathematics');
+                }
+                if (lowerMsg.includes('help') || lowerMsg.includes('problem')) {
+                    topics.push('problem-solving');
+                }
+            }
+        });
+        
+        return {
+            recentTopics: [...new Set(topics)],
+            userQuestions: userQuestions,
+            conversationLength: this.conversationHistory.length,
+            userPersonality: this.userPersonality
+        };
+    }
+
+    getTimeOfDay() {
+        const hour = new Date().getHours();
+        if (hour < 6) return 'early_morning';
+        if (hour < 12) return 'morning';
+        if (hour < 18) return 'afternoon';
+        if (hour < 22) return 'evening';
+        return 'night';
+    }
+
+    detectUserMood(message) {
+        const lowerMessage = message.toLowerCase();
+        const positiveWords = ['great', 'awesome', 'amazing', 'love', 'excited', 'happy', 'wonderful'];
+        const negativeWords = ['frustrated', 'stuck', 'confused', 'difficult', 'hard', 'problem', 'error'];
+        const urgentWords = ['urgent', 'asap', 'quickly', 'immediately', 'help', 'stuck'];
+        
+        let mood = 'neutral';
+        if (positiveWords.some(word => lowerMessage.includes(word))) mood = 'positive';
+        if (negativeWords.some(word => lowerMessage.includes(word))) mood = 'frustrated';
+        if (urgentWords.some(word => lowerMessage.includes(word))) mood = 'urgent';
+        
+        return mood;
+    }
+
+    generateContextualResponse(message, context, timeOfDay, userMood) {
+        const lowerMessage = message.toLowerCase();
+        
+        // Greeting responses
+        if (this.isGreeting(lowerMessage)) {
+            return this.generateDynamicGreeting(context, timeOfDay);
         }
         
-        if (lowerMessage.includes('python') || lowerMessage.includes('django') ||
-            lowerMessage.includes('flask') || lowerMessage.includes('pandas')) {
-            return this.generatePythonResponse(message);
+        // Programming topics
+        if (lowerMessage.includes('code') || lowerMessage.includes('programming') || 
+            lowerMessage.includes('javascript') || lowerMessage.includes('python') ||
+            lowerMessage.includes('html') || lowerMessage.includes('css')) {
+            return this.generateDynamicProgrammingResponse(message, context, userMood);
         }
         
-        if (lowerMessage.includes('html') || lowerMessage.includes('css') ||
-            lowerMessage.includes('web design') || lowerMessage.includes('frontend')) {
-            return this.generateWebDevResponse(message);
+        // Math topics
+        if (lowerMessage.includes('math') || lowerMessage.includes('equation') ||
+            lowerMessage.includes('calculate') || lowerMessage.includes('solve')) {
+            return this.generateDynamicMathTopicResponse(message, context, userMood);
         }
         
-        // Technology topics
-        if (lowerMessage.includes('ai') || lowerMessage.includes('artificial intelligence') ||
-            lowerMessage.includes('machine learning') || lowerMessage.includes('ml')) {
-            return this.generateAIResponse(message);
+        // Learning requests
+        if (lowerMessage.includes('learn') || lowerMessage.includes('how to') ||
+            lowerMessage.includes('tutorial') || lowerMessage.includes('teach')) {
+            return this.generateDynamicLearningResponse(message, context, userMood);
         }
         
-        if (lowerMessage.includes('database') || lowerMessage.includes('sql') ||
-            lowerMessage.includes('mysql') || lowerMessage.includes('mongodb')) {
-            return this.generateDatabaseResponse(message);
-        }
-        
-        // General questions
-        if (lowerMessage.includes('what is') || lowerMessage.includes('explain') ||
-            lowerMessage.includes('define') || lowerMessage.includes('meaning')) {
-            return this.generateExplanationResponse(message);
-        }
-        
-        if (lowerMessage.includes('how to') || lowerMessage.includes('tutorial') ||
-            lowerMessage.includes('learn') || lowerMessage.includes('guide')) {
-            return this.generateLearningResponse(message);
-        }
-        
+        // Problem solving
         if (lowerMessage.includes('problem') || lowerMessage.includes('issue') ||
-            lowerMessage.includes('error') || lowerMessage.includes('bug')) {
-            return this.generateProblemSolvingResponse(message);
+            lowerMessage.includes('error') || lowerMessage.includes('bug') ||
+            lowerMessage.includes('stuck') || lowerMessage.includes('help')) {
+            return this.generateDynamicProblemSolvingResponse(message, context, userMood);
         }
         
-        // Questions about the bot itself
-        if (lowerMessage.includes('who are you') || lowerMessage.includes('what are you') ||
-            lowerMessage.includes('your name') || lowerMessage.includes('introduce')) {
-            return this.generateSelfIntroduction();
-        }
-        
-        // Feelings and emotions
-        if (lowerMessage.includes('how are you') || lowerMessage.includes('feeling') ||
-            lowerMessage.includes('mood')) {
-            return this.generateEmotionalResponse();
-        }
-        
-        // Thank you responses
-        if (lowerMessage.includes('thank') || lowerMessage.includes('thanks') ||
-            lowerMessage.includes('appreciate')) {
-            return this.generateThankYouResponse();
-        }
-        
-        // Goodbye
-        if (lowerMessage.includes('bye') || lowerMessage.includes('goodbye') ||
-            lowerMessage.includes('see you') || lowerMessage.includes('farewell')) {
-            return this.generateGoodbyeResponse();
-        }
-        
-        // More intelligent default responses based on question patterns
-        if (lowerMessage.includes('?') || lowerMessage.includes('what') || 
+        // Questions
+        if (lowerMessage.includes('?') || lowerMessage.includes('what') ||
             lowerMessage.includes('why') || lowerMessage.includes('how') ||
             lowerMessage.includes('when') || lowerMessage.includes('where')) {
-            return this.generateQuestionResponse(message);
+            return this.generateDynamicQuestionResponse(message, context, userMood);
         }
         
-        // Default response - more engaging
-        return this.generateCreativeDefaultResponse(message);
+        // Default dynamic response
+        return this.generateDynamicDefaultResponse(message, context, userMood);
+    }
+
+    generateDynamicGreeting(context, timeOfDay) {
+        const greetings = {
+            early_morning: [
+                "Good early morning! You're up bright and early - perfect time for some focused learning!",
+                "Wow, you're an early bird! I love the dedication. What can we tackle together this morning?",
+                "Early morning coding session? I'm impressed! Let's make the most of this quiet time."
+            ],
+            morning: [
+                "Good morning! What a great way to start the day - ready to learn something new?",
+                "Morning! I'm excited to help you with whatever you're working on today.",
+                "Good morning! I hope you're having a wonderful start to your day. What can I help you with?"
+            ],
+            afternoon: [
+                "Good afternoon! I hope your day is going well. What would you like to explore?",
+                "Afternoon! Perfect time for some productive learning. What's on your mind?",
+                "Good afternoon! I'm here and ready to help with whatever you need."
+            ],
+            evening: [
+                "Good evening! I hope you've had a productive day. What can we work on together?",
+                "Evening! Great time to wind down with some learning. What interests you?",
+                "Good evening! I'm here to help you with whatever you need."
+            ],
+            night: [
+                "Good evening! Working late? I'm here to help you with whatever you need.",
+                "Evening! I hope your day has been productive. What can we explore together?",
+                "Good evening! Perfect time for some focused learning. What's on your mind?"
+            ]
+        };
+        
+        const timeGreetings = greetings[timeOfDay] || greetings.evening;
+        const baseGreeting = timeGreetings[Math.floor(Math.random() * timeGreetings.length)];
+        
+        // Add contextual elements
+        if (context.recentTopics.includes('programming')) {
+            return baseGreeting + " I see you've been working on programming - ready to dive deeper into that?";
+        }
+        if (context.recentTopics.includes('mathematics')) {
+            return baseGreeting + " I notice you've been exploring math - shall we continue with that?";
+        }
+        if (context.userQuestions.length > 0) {
+            return baseGreeting + " I see you've been asking great questions - what else would you like to know?";
+        }
+        
+        return baseGreeting;
+    }
+
+    generateDynamicProgrammingResponse(message, context, userMood) {
+        const lowerMessage = message.toLowerCase();
+        const programmingTopics = this.detectProgrammingTopics(message);
+        const urgency = userMood === 'urgent' ? 'urgent' : 'normal';
+        
+        let response = "";
+        
+        // Detect specific programming language or concept
+        if (lowerMessage.includes('javascript') || lowerMessage.includes('js')) {
+            response = this.generateJavaScriptResponse(message, context, urgency);
+        } else if (lowerMessage.includes('python')) {
+            response = this.generatePythonResponse(message, context, urgency);
+        } else if (lowerMessage.includes('html') || lowerMessage.includes('css')) {
+            response = this.generateWebDevResponse(message, context, urgency);
+        } else if (lowerMessage.includes('react') || lowerMessage.includes('vue') || lowerMessage.includes('angular')) {
+            response = this.generateFrameworkResponse(message, context, urgency);
+        } else {
+            response = this.generateGeneralProgrammingResponse(message, context, urgency);
+        }
+        
+        return response;
+    }
+
+    detectProgrammingTopics(message) {
+        const topics = [];
+        const lowerMessage = message.toLowerCase();
+        
+        if (lowerMessage.includes('javascript') || lowerMessage.includes('js')) topics.push('javascript');
+        if (lowerMessage.includes('python')) topics.push('python');
+        if (lowerMessage.includes('html')) topics.push('html');
+        if (lowerMessage.includes('css')) topics.push('css');
+        if (lowerMessage.includes('react')) topics.push('react');
+        if (lowerMessage.includes('node')) topics.push('nodejs');
+        if (lowerMessage.includes('database') || lowerMessage.includes('sql')) topics.push('database');
+        if (lowerMessage.includes('api')) topics.push('api');
+        if (lowerMessage.includes('algorithm')) topics.push('algorithms');
+        if (lowerMessage.includes('debug')) topics.push('debugging');
+        
+        return topics;
+    }
+
+    generateJavaScriptResponse(message, context, urgency) {
+        const responses = [
+            `JavaScript is absolutely fascinating! It's like the Swiss Army knife of programming - you can build anything from simple websites to complex applications. ${urgency === 'urgent' ? 'Let me help you solve this quickly!' : 'What specific aspect of JavaScript are you working with?'}`,
+            `Ah, JavaScript! The language that brought the web to life. ${urgency === 'urgent' ? 'I can help you debug this right away!' : 'Are you working on frontend, backend with Node.js, or maybe a framework like React?'}`,
+            `JavaScript is everywhere these days! ${urgency === 'urgent' ? 'Let's tackle this problem together!' : 'What would you like to explore - ES6 features, DOM manipulation, or perhaps some advanced concepts?'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generatePythonResponse(message, context, urgency) {
+        const responses = [
+            `Python is such an elegant language! ${urgency === 'urgent' ? 'Let me help you solve this quickly!' : 'Are you working on data science, web development with Django/Flask, or maybe some automation?'}`,
+            `Python - where simplicity meets power! ${urgency === 'urgent' ? 'I can help you debug this right away!' : 'What Python project are you working on? I love helping with Python!'}`,
+            `Python is perfect for so many things! ${urgency === 'urgent' ? 'Let's solve this together!' : 'Are you exploring machine learning, web scraping, or building applications?'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateWebDevResponse(message, context, urgency) {
+        const responses = [
+            `Web development is where creativity meets technology! ${urgency === 'urgent' ? 'Let me help you fix this quickly!' : 'Are you working on the structure with HTML, styling with CSS, or maybe some responsive design?'}`,
+            `HTML and CSS are the foundation of every great website! ${urgency === 'urgent' ? 'I can help you solve this right away!' : 'What specific aspect of web development are you focusing on?'}`,
+            `Building websites is like crafting digital experiences! ${urgency === 'urgent' ? 'Let's tackle this together!' : 'Are you working on layout, styling, or maybe some interactive features?'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateFrameworkResponse(message, context, urgency) {
+        const responses = [
+            `Modern frameworks make development so much more efficient! ${urgency === 'urgent' ? 'Let me help you solve this quickly!' : 'Are you working on a React app, Vue project, or maybe something with Angular?'}`,
+            `Frameworks are game-changers for development! ${urgency === 'urgent' ? 'I can help you debug this right away!' : 'What framework are you using, and what specific challenge are you facing?'}`,
+            `Frameworks really speed up development! ${urgency === 'urgent' ? 'Let's solve this together!' : 'Are you building a single-page application or working on component architecture?'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateGeneralProgrammingResponse(message, context, urgency) {
+        const responses = [
+            `Programming is such a creative and logical field! ${urgency === 'urgent' ? 'Let me help you solve this quickly!' : 'What programming challenge are you working on? I love helping with code!'}`,
+            `I absolutely love programming discussions! ${urgency === 'urgent' ? 'I can help you debug this right away!' : 'Are you learning a new language, working on a project, or maybe debugging something?'}`,
+            `Programming is like solving puzzles that create amazing things! ${urgency === 'urgent' ? 'Let's tackle this together!' : 'What would you like to explore - algorithms, data structures, or maybe a specific language?'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateDynamicMathTopicResponse(message, context, userMood) {
+        const responses = [
+            `Mathematics is the language of the universe! ${userMood === 'frustrated' ? 'I can help you understand this step by step!' : 'What mathematical concept are you exploring?'}`,
+            `Math problems are like puzzles waiting to be solved! ${userMood === 'urgent' ? 'Let me help you work through this quickly!' : 'Are you working on algebra, calculus, or maybe something more advanced?'}`,
+            `I love helping with mathematics! ${userMood === 'frustrated' ? 'Let's break this down together!' : 'What specific math topic would you like to explore?'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateDynamicLearningResponse(message, context, userMood) {
+        const responses = [
+            `Learning is one of the most exciting things we can do! ${userMood === 'urgent' ? 'Let me help you learn this quickly!' : 'What would you like to learn about today?'}`,
+            `I absolutely love helping people learn new things! ${userMood === 'frustrated' ? 'Let's take this step by step!' : 'What skill or topic interests you most?'}`,
+            `Learning is a journey, and I'm excited to be part of yours! ${userMood === 'urgent' ? 'I can help you master this!' : 'What would you like to explore and understand better?'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateDynamicProblemSolvingResponse(message, context, userMood) {
+        const responses = [
+            `Every problem is an opportunity to learn and grow! ${userMood === 'urgent' ? 'Let me help you solve this quickly!' : 'What problem are you facing? I love tackling challenges!'}`,
+            `Problems are just puzzles waiting for the right solution! ${userMood === 'frustrated' ? 'Let's work through this together step by step!' : 'What specific issue are you dealing with?'}`,
+            `I'm here to help you solve any problem! ${userMood === 'urgent' ? 'Let's tackle this right away!' : 'What challenge are you working on? I love problem-solving!'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateDynamicQuestionResponse(message, context, userMood) {
+        const responses = [
+            `That's a fantastic question! ${userMood === 'urgent' ? 'Let me give you a quick, clear answer!' : 'I love thoughtful questions like this!'}`,
+            `Great question! ${userMood === 'frustrated' ? 'Let me explain this in a way that makes sense!' : 'Questions like this really show you're thinking deeply!'}`,
+            `I love questions like this! ${userMood === 'urgent' ? 'Let me help you understand this quickly!' : 'Your curiosity is exactly what drives learning forward!'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateDynamicDefaultResponse(message, context, userMood) {
+        const responses = [
+            `That's really interesting! ${userMood === 'urgent' ? 'Let me help you with this quickly!' : 'I'd love to explore this topic with you!'}`,
+            `I'm intrigued by what you're saying! ${userMood === 'frustrated' ? 'Let me help you work through this!' : 'What specific aspect would you like to dive into?'}`,
+            `That sounds fascinating! ${userMood === 'urgent' ? 'I can help you with this right away!' : 'I'm excited to learn more about your perspective on this!'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateDynamicMathResponse(expression, result, context) {
+        const responses = [
+            `Brilliant calculation! ${expression} = ${result}. ${context.userPersonality.enthusiastic > 2 ? 'I love your enthusiasm for math!' : 'Math is so satisfying when it all comes together!'}`,
+            `Perfect! The answer to ${expression} is ${result}. ${context.userPersonality.curious > 2 ? 'Your curiosity about numbers is wonderful!' : 'Every equation tells a story!'}`,
+            `Excellent work! ${expression} equals ${result}. ${context.userPersonality.detailed > 2 ? 'I appreciate your attention to detail!' : 'Numbers never lie, and that's beautiful!'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    generateDynamicErrorResponse(message, context) {
+        const responses = [
+            `I'm not quite sure about that math problem. ${context.userPersonality.polite > 2 ? 'Thank you for being so patient!' : 'Could you rephrase it? I'd love to help you solve it!'}`,
+            `That math expression is a bit tricky for me. ${context.userPersonality.curious > 2 ? 'I love that you're exploring complex math!' : 'Could you break it down differently? I'm here to help!'}`,
+            `I'm having trouble with that calculation. ${context.userPersonality.enthusiastic > 2 ? 'Your enthusiasm for math is contagious!' : 'Could you try expressing it another way? Let's solve this together!'}`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
     }
 
     // Creative response generation methods
