@@ -1,0 +1,29 @@
+{
+  "name": "ai-bot-gh-pages",
+  "version": "1.0.0",
+  "description": "A beautiful AI chat bot for GitHub Pages",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server . -p 3000 -o",
+    "build": "echo 'No build process needed for static site'",
+    "deploy": "echo 'Deploy to GitHub Pages by pushing to main branch'"
+  },
+  "keywords": [
+    "ai",
+    "chatbot",
+    "github-pages",
+    "javascript",
+    "html",
+    "css"
+  ],
+  "author": "GovernmentSpy",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.io/governmentspy"
+  },
+  "homepage": "https://github.io/governmentspy"
+}
