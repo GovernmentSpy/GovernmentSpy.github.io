@@ -12,7 +12,7 @@
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-content">
             <div class="ascii-art" id="asciiArt">
-                <pre>
+<pre>
 MMMMMMMM               MMMMMMMM   SSSSSSSSSSSSSSS TTTTTTTTTTTTTTTTTTTTTTT
 M:::::::M             M:::::::M SS:::::::::::::::ST:::::::::::::::::::::T
 M::::::::M           M::::::::MS:::::SSSSSS::::::ST:::::::::::::::::::::T
@@ -29,7 +29,7 @@ M::::::M               M::::::MSSSSSSS     S:::::S      TT:::::::TT
 M::::::M               M::::::MS::::::SSSSSS:::::S      T:::::::::T      
 M::::::M               M::::::MS:::::::::::::::SS       T:::::::::T      
 MMMMMMMM               MMMMMMMM SSSSSSSSSSSSSSS         TTTTTTTTTTT      
-                </pre>
+</pre>
             </div>
             <div class="loading-text">Initializing MST Assistant...</div>
             <div class="loading-bar">
@@ -38,25 +38,19 @@ MMMMMMMM               MMMMMMMM SSSSSSSSSSSSSSS         TTTTTTTTTTT
         </div>
     </div>
 
-    <!-- Main Chat Interface -->
+    <!-- Chat Interface -->
     <div class="chat-interface" id="chatInterface">
         <div class="chat-header">
             <div class="header-left">
-                <div class="ai-avatar">
-                    <i class="fas fa-robot"></i>
-                </div>
+                <div class="ai-avatar"><i class="fas fa-robot"></i></div>
                 <div class="header-info">
                     <h1>AI Assistant</h1>
                     <span class="status">Online</span>
                 </div>
             </div>
             <div class="header-actions">
-                <button class="action-btn" id="newChatBtn" title="New Chat">
-                    <i class="fas fa-plus"></i>
-                </button>
-                <button class="action-btn" id="settingsBtn" title="Settings">
-                    <i class="fas fa-cog"></i>
-                </button>
+                <button class="action-btn" id="newChatBtn"><i class="fas fa-plus"></i></button>
+                <button class="action-btn" id="settingsBtn"><i class="fas fa-cog"></i></button>
             </div>
         </div>
 
@@ -64,9 +58,7 @@ MMMMMMMM               MMMMMMMM SSSSSSSSSSSSSSS         TTTTTTTTTTT
             <div class="chat-messages" id="chatMessages">
                 <div class="welcome-message">
                     <div class="welcome-content">
-                        <div class="ai-avatar-large">
-                            <i class="fas fa-robot"></i>
-                        </div>
+                        <div class="ai-avatar-large"><i class="fas fa-robot"></i></div>
                         <h2>Hello! I'm your MST AI Assistant</h2>
                         <p>I can help you with programming, math, problem-solving, and much more. What would you like to explore today?</p>
                     </div>
@@ -76,25 +68,10 @@ MMMMMMMM               MMMMMMMM SSSSSSSSSSSSSSS         TTTTTTTTTTT
             <div class="chat-input-container">
                 <div class="input-wrapper">
                     <input type="text" id="messageInput" placeholder="Message AI Assistant..." autocomplete="off">
-                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
-                    <button id="imageButton" class="image-button" title="Upload image">
-                        <i class="fas fa-image"></i>
-                    </button>
-                    <button id="sendButton" class="send-button">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+                    <button id="sendButton" class="send-button"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="typing-indicator" id="typingIndicator">
-        <div class="typing-dots">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-        <span class="typing-text">MST AI is thinking...</span>
     </div>
 
     <script>
@@ -103,29 +80,60 @@ MMMMMMMM               MMMMMMMM SSSSSSSSSSSSSSS         TTTTTTTTTTT
         const progressBar = document.getElementById("loadingProgress");
         const asciiArt = document.getElementById("asciiArt");
 
-        let progress = 0;
-
-        // ASCII pulse effect
+        // ASCII glow effect
         setInterval(() => {
-            asciiArt.style.textShadow = `0 0 ${Math.random() * 20 + 10}px #00ff88, 0 0 ${Math.random() * 30 + 10}px #00cc6a`;
+            asciiArt.style.textShadow = `0 0 ${Math.random()*20 + 10}px #00ff88, 0 0 ${Math.random()*30 + 10}px #00cc6a`;
         }, 500);
 
+        // Progress bar + auto-load
+        let progress = 0;
         const interval = setInterval(() => {
             progress += 2;
             progressBar.style.width = progress + "%";
 
-            if (progress >= 100) {
+            if(progress >= 100){
                 clearInterval(interval);
-                // Fade out loading
+                // fade out loading screen
                 loadingScreen.style.opacity = 0;
-                // Fade in chat
-                chatInterface.style.display = "flex";
                 setTimeout(() => {
-                    chatInterface.style.opacity = 1;
                     loadingScreen.style.display = "none";
-                }, 50);
+                    chatInterface.style.opacity = 0;
+                    chatInterface.style.display = "flex";
+                    setTimeout(()=> chatInterface.style.opacity = 1, 50);
+                }, 800);
             }
         }, 60);
+
+        // Send message simulation
+        const sendBtn = document.getElementById("sendButton");
+        const msgInput = document.getElementById("messageInput");
+        const chatMessages = document.getElementById("chatMessages");
+
+        sendBtn.addEventListener("click", ()=>{
+            const msg = msgInput.value.trim();
+            if(!msg) return;
+
+            const userDiv = document.createElement("div");
+            userDiv.className = "message user-message";
+            userDiv.innerHTML = `<div class="message-avatar">U</div><div class="message-content">${msg}</div>`;
+            chatMessages.appendChild(userDiv);
+            msgInput.value = "";
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Simulate AI response
+            setTimeout(()=>{
+                const botDiv = document.createElement("div");
+                botDiv.className = "message bot-message";
+                botDiv.innerHTML = `<div class="message-avatar"><i class="fas fa-robot"></i></div><div class="message-content">I got your message: "${msg}"</div>`;
+                chatMessages.appendChild(botDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 800);
+        });
+
+        // Enter key send
+        msgInput.addEventListener("keypress", (e)=>{
+            if(e.key === "Enter") sendBtn.click();
+        });
     </script>
 </body>
 </html>
