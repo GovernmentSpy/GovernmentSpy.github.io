@@ -1,4 +1,4 @@
-// Advanced AI Bot with ChatGPT-like Intelligence
+// AI Bot with ChatGPT-like Intelligence
 class AIBot {
     constructor() {
         this.chatMessages = document.getElementById('chatMessages');
