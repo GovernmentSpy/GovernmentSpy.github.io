@@ -1,190 +1,77 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Math Solver Thing</title>
-<style>
-:root{--bg:#0b0f13;--text:#dfe7eb;--accent:#4eb1ff;}
-html,body{height:100%;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,'Roboto Mono',monospace;}
-body{background:radial-gradient(ellipse at 10% 10%, #071018 0%, var(--bg) 40%);color:var(--text);display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.container{width:100%;max-width:980px;padding:24px;text-align:center;}
-.entry-button{border:0;background:transparent;cursor:pointer;padding:12px 18px;line-height:1;border-radius:8px;outline:none;box-shadow:0 6px 24px rgba(2,6,10,0.6), inset 0 -1px 0 rgba(255,255,255,0.02);}
-.entry-button:hover{ transform: translateY(-4px) scale(1.01);}
-pre.ascii{margin:0;white-space:pre;font-size:18px;letter-spacing:1px;color:var(--text);background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:26px 42px;border-radius:10px;border: 1px solid rgba(255,255,255,0.03);box-shadow: 0 8px 40px rgba(0,0,0,0.7);}
-.hint{margin-top:18px;color:rgba(223,231,235,0.7);font-size:13px;}
-.fire-glitch{animation: fireGlitch 0.8s linear forwards;}
-@keyframes fireGlitch{0% {transform:translate(0,0);color:#ff4500;}100% {transform:translate(0,0);color:#ff8c00;}}
-.fade-out{animation: fadeOutAndScale .55s ease forwards;}
-@keyframes fadeOutAndScale{ to{ opacity:0; transform:scale(0.98) translateY(-8px); } }
-.main-content{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(3,6,10,0.7), rgba(3,6,10,0.92));color:var(--text);padding:40px;opacity:0;pointer-events:none;transform:scale(1.02);transition:opacity .45s ease, transform .45s ease;flex-direction:column;overflow-y:auto;}
-.main-content.visible{opacity:1;pointer-events:auto;transform:scale(1);}
-.card{background: rgba(6,10,14,0.6);border-radius:12px;padding:28px;width:100%;max-width:880px;box-shadow:0 12px 60px rgba(2,6,12,0.7);border:1px solid rgba(255,255,255,0.03);text-align:left;}
-.note-area{width:100%;min-height:300px;background:#11161d;border-radius:10px;padding:12px;color:var(--text);resize:vertical;border:1px solid rgba(255,255,255,0.05);font-size:14px;}
-.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.toggle{cursor:pointer;padding:6px 12px;border-radius:6px;background:#182028;border:1px solid rgba(255,255,255,0.08);font-size:13px;color:var(--accent);user-select:none;}
-.output{margin-top:14px;background:#0e141a;padding:12px;border-radius:10px;min-height:60px;white-space:pre-wrap;font-size:14px;}
-small{display:block;color:#9bb0c0;margin-top:2px;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Bot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-<div class="container" id="entryContainer">
-  <button class="entry-button" id="entryBtn" aria-label="Enter site">
-    <pre class="ascii" id="asciiArt">
-░▒▓██████████████▓▒░ ░▒▓███████▓▒░▒▓████████▓▒░ 
-░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░     
-░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░     
-░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░   ░▒▓█▓▒░     
-░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░     
-░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░     
-░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░   ░▒▓█▓▒░     
-                                                
-                                                
-    </pre>
-  </button>
-  <div class="hint">Click to Enter</div>
-</div>
-<div class="main-content" id="mainContent">
-  <div class="card">
-    <div class="toolbar">
-      <div>Teacher Mode: <span id="modeStatus">ON</span></div>
-      <div class="toggle" id="toggleMode">Toggle Mode</div>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="bot-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="header-text">
+                    <h1>AI Assistant</h1>
+                    <p>Ask me anything!</p>
+                </div>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text">Online</span>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Hello! I'm your AI assistant. How can I help you today?</p>
+                        <span class="message-time">Just now</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="input-wrapper">
+                    <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
+                    <button id="sendButton" class="send-button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="quick-actions">
+                    <button class="quick-action" data-message="What can you help me with?">
+                        <i class="fas fa-question-circle"></i>
+                        What can you help with?
+                    </button>
+                    <button class="quick-action" data-message="Tell me a joke">
+                        <i class="fas fa-smile"></i>
+                        Tell me a joke
+                    </button>
+                    <button class="quick-action" data-message="Help me with coding">
+                        <i class="fas fa-code"></i>
+                        Coding help
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-    <textarea id="noteInput" class="note-area" placeholder="Type math expressions naturally, e.g.
-derivative x^2*y + sin(y*z) with respect to x,y
-integrate x*y dx dy
-limit x^2 + y^2 at x=1,y=2
-x^2 + 3*x + 2"></textarea>
-    <div style="margin-top:10px;">
-      <button class="toggle" id="saveNote">Save</button>
-      <button class="toggle" id="renderNote">Answer</button>
+
+    <div class="typing-indicator" id="typingIndicator">
+        <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <span class="typing-text">AI is typing...</span>
     </div>
-    <div class="output" id="renderedOutput"></div>
-  </div>
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<script>
-const entryBtn=document.getElementById('entryBtn');
-const asciiArt=document.getElementById('asciiArt');
-const entryContainer=document.getElementById('entryContainer');
-const mainContent=document.getElementById('mainContent');
-entryBtn.addEventListener('click',()=>{asciiArt.classList.add('fire-glitch');setTimeout(()=>{asciiArt.classList.remove('fire-glitch');entryContainer.classList.add('fade-out');setTimeout(()=>{mainContent.classList.add('visible');entryContainer.style.display='none';},380);},800);});
 
-const noteInput=document.getElementById('noteInput');
-const renderedOutput=document.getElementById('renderedOutput');
-const toggleMode=document.getElementById('toggleMode');
-const modeStatus=document.getElementById('modeStatus');
-let teacherMode=true;
-toggleMode.addEventListener('click',()=>{teacherMode=!teacherMode;modeStatus.textContent=teacherMode?'ON':'OFF';renderMath();});
-document.getElementById('renderNote').addEventListener('click',renderMath);
-document.getElementById('saveNote').addEventListener('click',()=>{localStorage.setItem('mathNotes',noteInput.value);alert('Notes saved!');});
-window.addEventListener('load',()=>{const saved=localStorage.getItem('mathNotes');if(saved)noteInput.value=saved;});
-
-// Parse expressions
-function parseExpression(line){
-  let l=line.trim();
-  if(l.toLowerCase().startsWith('derivative')){
-    let m=l.match(/derivative\s+(.*?)(?:\s+with respect to\s+([a-z, ]+))?$/i);
-    if(m){return {type:'derivative',expr:m[1].trim(),vars:(m[2]||'x').split(',').map(v=>v.trim())};}
-  } else if(l.toLowerCase().startsWith('integrate')){
-    let vars=(l.match(/d([a-z])/gi)||[]).map(v=>v[1]);
-    let expr=l.replace(/integrate|d[a-z]/gi,'').trim();
-    return {type:'integrate',expr:expr,vars:vars};
-  } else if(l.toLowerCase().startsWith('limit')){
-    let m=l.match(/limit\s+(.*)\s+at\s+(.+)/i);
-    if(m){
-      let assignments=m[2].split(',').map(a=>a.split('=').map(s=>s.trim()));
-      let points={};
-      assignments.forEach(a=>{points[a[0]]=parseFloat(a[1])});
-      return {type:'limit',expr:m[1].trim(),points:points};
-    }
-  } else if(l.match(/x\^2|y\^2|z\^2|[+-]?\d+\*?[a-z]/i)){
-    return {type:'algebra',expr:l};
-  }
-  return {type:'eval',expr:l};
-}
-
-// Symbolic simplification function
-function simplifySteps(expr){
-  let steps='';
-  try{
-    let simplified = math.simplify(expr).toString();
-    if(teacherMode){
-      steps += `\\\\( ${expr} \\to ${simplified} \\\\)\\\\\n`;
-    }
-    return {result: simplified, steps};
-  }catch{return {result:expr, steps:'Cannot simplify'};}
-}
-
-// Derivatives
-function derivativeSteps(expr, vars){
-  let steps='', result=expr;
-  vars.forEach(v=>{
-    try{
-      const d=math.derivative(result,v).toString();
-      const s = simplifySteps(d);
-      steps += `\\\\(\\frac{\\partial}{\\partial ${v}}(${result}) = ${s.result})\\\\\n` + s.steps;
-      result = s.result;
-    }catch{steps += `Cannot differentiate w.r.t ${v}\\\\\n`;}
-  });
-  return {result,steps};
-}
-
-// Integrals
-function integralSteps(expr, vars){
-  let steps='', result=expr;
-  vars.forEach(v=>{
-    try{
-      let intExpr = math.integral(result, v).toString();
-      const s = simplifySteps(intExpr);
-      steps += `\\\\(\\int ${result} \\, d${v} = ${s.result}\\\\)\\\\\n` + s.steps;
-      result = s.result;
-    }catch{steps += `Cannot integrate w.r.t ${v}\\\\\n`;}
-  });
-  return {result, steps};
-}
-
-// Limits
-function limitSteps(expr, points){
-  let steps='', approx=NaN;
-  try{
-    let scope=Object.assign({},points);
-    approx=math.evaluate(expr,scope);
-    steps = `Approximate evaluation: ${JSON.stringify(points)} => ${approx}`;
-  }catch{steps='Cannot compute limit'}
-  return {result: approx, steps};
-}
-
-// Algebra simplification
-function algebraSteps(expr){return simplifySteps(expr);}
-
-// Render function
-function renderMath(){
-  let lines=noteInput.value.split(/\n+/);
-  let html='';
-  lines.forEach(line=>{
-    if(!line.trim()){html+='<br>';return;}
-    let parsed=parseExpression(line);
-    if(parsed.type==='derivative'){
-      let res=derivativeSteps(parsed.expr,parsed.vars);
-      html+=teacherMode?`${line} = <strong>${res.result}</strong><small>${res.steps}</small><br>`:`${line} = <strong>${res.result}</strong><br>`;
-    } else if(parsed.type==='integrate'){
-      let res=integralSteps(parsed.expr,parsed.vars);
-      html+=teacherMode?`${line} = <strong>${res.result}</strong><small>${res.steps}</small><br>`:`${line} = <strong>${res.result}</strong><br>`;
-    } else if(parsed.type==='limit'){
-      let res=limitSteps(parsed.expr,parsed.points);
-      html+=teacherMode?`${line} = <strong>${res.result}</strong><small>${res.steps}</small><br>`:`${line} = <strong>${res.result}</strong><br>`;
-    } else if(parsed.type==='algebra'){
-      let res=algebraSteps(parsed.expr);
-      html+=teacherMode?`${line} = <strong>${res.result}</strong><small>${res.steps}</small><br>`:`${line} = <strong>${res.result}</strong><br>`;
-    } else{
-      try{let val=math.evaluate(parsed.expr); html+=`${line} = <strong>${val}</strong><br>`;}catch{html+=line+'<br>';}
-    }
-  });
-  renderedOutput.innerHTML=html;
-  if(window.MathJax) MathJax.typesetPromise([renderedOutput]);
-}
-</script>
+    <script src="script.js"></script>
 </body>
 </html>
