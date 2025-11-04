@@ -1,7 +1,7 @@
 {
   "name": "ai-bot-gh-pages",
   "version": "1.0.0",
-  "description": "A beautiful AI chat bot for GitHub Pages",
+  "description": "GH Page AI",
   "main": "index.html",
   "scripts": {
     "start": "npx http-server . -p 3000 -o",
