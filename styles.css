@@ -1,4 +1,3 @@
-/* ChatGPT-like Dark Theme */
 * {
     margin: 0;
     padding: 0;
@@ -36,7 +35,7 @@ body {
 }
 
 .ascii-art {
-    color: #2c5f96;  /* blue text color */
+    color: #2c5f96;
     font-family: 'Courier New', monospace;
     font-size: 12px;
     line-height: 1.2;
@@ -92,7 +91,6 @@ body {
     transition: opacity 0.8s ease-out;
 }
 
-/* Chat Header */
 .chat-header {
     background: #2d2d2d;
     border-bottom: 1px solid #404040;
@@ -168,7 +166,6 @@ body {
     transform: scale(1.05);
 }
 
-/* Chat Container */
 .chat-container {
     flex: 1;
     display: flex;
@@ -182,7 +179,7 @@ body {
     padding: 20px;
     overflow-y: auto;
     background: #212121;
-    height: calc(100vh - 160px); /* adjust based on header + input height */
+    height: calc(100vh - 160px);
     scroll-behavior: smooth;
 }
 
@@ -203,7 +200,6 @@ body {
     background: #666666;
 }
 
-/* Welcome Message */
 .welcome-message {
     display: flex;
     justify-content: center;
@@ -242,7 +238,6 @@ body {
     line-height: 1.6;
 }
 
-/* Messages */
 .message {
     display: flex;
     margin-bottom: 20px;
@@ -285,7 +280,6 @@ body {
 
 .message-time { font-size: 11px; opacity: 0.7; margin-top: 8px; display: block; }
 
-/* Chat Input */
 .chat-input-container {
     position: sticky;
     bottom: 0;
@@ -340,7 +334,6 @@ body {
 .send-button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(51, 153, 255, 0.3); }
 .send-button:active { transform: scale(0.95); }
 
-/* Typing Indicator */
 .typing-indicator {
     position: absolute;
     bottom: 100px;
@@ -375,7 +368,6 @@ body {
     40% { transform: scale(1); opacity: 1; }
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .chat-header { padding: 10px 15px; }
     .header-info h1 { font-size: 16px; }
